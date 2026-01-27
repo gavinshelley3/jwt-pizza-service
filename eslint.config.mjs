@@ -21,6 +21,10 @@ export default defineConfig([
     languageOptions: { globals: globals.jest },
   },
   {
+    files: ["**/*testUtils.js"],
+    languageOptions: { globals: globals.jest },
+  },
+  {
     ...pluginReact.configs.flat.recommended,
     settings: { react: { version: "18.0" } },
   },
