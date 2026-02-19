@@ -3,6 +3,8 @@ const mockDb = {
   addUser: jest.fn(),
   getUser: jest.fn(),
   updateUser: jest.fn(),
+  deleteUser: jest.fn(),
+  getUsers: jest.fn(),
   loginUser: jest.fn(),
   isLoggedIn: jest.fn(),
   logoutUser: jest.fn(),
