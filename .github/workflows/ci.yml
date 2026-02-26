@@ -16,8 +16,8 @@ jobs:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
       DB_HOSTNAME: 127.0.0.1
-      DB_USERNAME: root
-      DB_PASSWORD: ${{ secrets.DB_CONNECTION_SECRET }}
+      DB_USER: root
+      DB_CONNECTION_SECRET: ${{ secrets.DB_CONNECTION_SECRET }}
       DB_NAME: pizza
     outputs:
       version: ${{ steps.set_version.outputs.version }}
@@ -45,28 +45,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Write config file
-        run: |
-          cat > src/config.js <<'EOF'
-          module.exports = {
-            jwtSecret: process.env.JWT_SECRET || "change-me",
-            db: {
-              connection: {
-                host: process.env.DB_HOSTNAME || process.env.DB_HOST || "127.0.0.1",
-                user: process.env.DB_USERNAME || process.env.DB_USER || "root",
-                password: process.env.DB_PASSWORD || process.env.DB_CONNECTION_SECRET || "change-me",
-                database: process.env.DB_NAME || "pizza",
-                connectTimeout: 60000,
-              },
-              listPerPage: 10,
-            },
-            factory: {
-              url: "https://pizza-factory.cs329.click",
-              apiKey: process.env.FACTORY_API_KEY || "change-me",
-            },
-          };
-          EOF
 
       - name: Lint
         run: npm run lint
