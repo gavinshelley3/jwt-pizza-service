@@ -12,6 +12,13 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+      DB_HOSTNAME: 127.0.0.1
+      DB_USERNAME: root
+      DB_PASSWORD: ${{ secrets.DB_CONNECTION_SECRET }}
+      DB_NAME: pizza
     outputs:
       version: ${{ steps.set_version.outputs.version }}
     services:
@@ -39,28 +46,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
-
       - name: Write config file
         run: |
-          echo "module.exports = {
-            jwtSecret: '${{ secrets.JWT_SECRET }}',
+          cat > src/config.js <<'EOF'
+          module.exports = {
+            jwtSecret: process.env.JWT_SECRET || "change-me",
             db: {
               connection: {
-                host: '127.0.0.1',
-                user: 'root',
-                password: '${{ secrets.DB_CONNECTION_SECRET }}',
-                database: 'pizza',
+                host: process.env.DB_HOSTNAME || process.env.DB_HOST || "127.0.0.1",
+                user: process.env.DB_USERNAME || process.env.DB_USER || "root",
+                password: process.env.DB_PASSWORD || process.env.DB_CONNECTION_SECRET || "change-me",
+                database: process.env.DB_NAME || "pizza",
                 connectTimeout: 60000,
               },
               listPerPage: 10,
             },
             factory: {
-              url: 'https://pizza-factory.cs329.click',
-              apiKey: '${{ secrets.FACTORY_API_KEY }}',
+              url: "https://pizza-factory.cs329.click",
+              apiKey: process.env.FACTORY_API_KEY || "change-me",
             },
-          };" > src/config.js
+          };
+          EOF
+
+      - name: Lint
+        run: npm run lint
 
       - name: Tests
         run: npm test
@@ -93,3 +102,59 @@ jobs:
           coverage=$(jq '.total.lines.pct' coverage/coverage-summary.json)
           color=$(echo "$coverage < 80" | bc | awk '{if ($1) print "red"; else print "green"}')
           curl -s -X POST "https://pizza-factory.cs329.click/api/badge/${{ secrets.NET_ID }}/jwtpizzaservicecoverage?label=Coverage&value=$coverage%25&color=$color" -H "authorization: bearer ${{ secrets.FACTORY_API_KEY }}"
+
+      - name: Create dist
+        run: |
+          mkdir dist
+          cp Dockerfile dist
+          cp -r src/* dist
+          cp *.json dist
+
+      - name: Update distribution artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: dist/
+
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    needs: build
+    env:
+      version: ${{needs.build.outputs.version}}
+    steps:
+      - name: Download distribution artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: package
+          path: dist
+
+      - name: Create OIDC token to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: sts.amazonaws.com
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.CI_IAM_ROLE }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up machine emulation
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker build
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push container image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: 'jwt-pizza-service'
+        run: |
+          docker buildx build --platform=linux/arm64 \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$version \
+            --push dist
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$version" >> $GITHUB_OUTPUT

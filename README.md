@@ -9,28 +9,30 @@ JWTs are used for authentication objects.
 
 ## Deployment
 
-In order for the server to work correctly it must be configured by providing a `config.js` file.
+The service reads runtime configuration from environment variables. If variables are not provided, local defaults are used.
 
 ```js
 module.exports = {
   // Your JWT secret can be any random string you would like. It just needs to be secret.
-  jwtSecret: "yourjwtsecrethere",
+  jwtSecret: process.env.JWT_SECRET || "change-me",
   db: {
     connection: {
-      host: "127.0.0.1",
-      user: "root",
-      password: "yourpasswordhere",
-      database: "pizza",
+      host: process.env.DB_HOSTNAME || process.env.DB_HOST || "127.0.0.1",
+      user: process.env.DB_USERNAME || process.env.DB_USER || "root",
+      password: process.env.DB_PASSWORD || process.env.DB_CONNECTION_SECRET || "change-me",
+      database: process.env.DB_NAME || "pizza",
       connectTimeout: 60000,
     },
     listPerPage: 10,
   },
   factory: {
     url: "https://pizza-factory.cs329.click",
-    apiKey: "yourapikeyhere",
+    apiKey: process.env.FACTORY_API_KEY || "change-me",
   },
 };
 ```
+
+For containerized deployment (ECR/ECS), provide DB and JWT secrets at runtime via AWS Secrets Manager or Parameter Store.
 
 ## Endpoints
 
