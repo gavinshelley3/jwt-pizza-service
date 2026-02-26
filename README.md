@@ -19,7 +19,10 @@ module.exports = {
     connection: {
       host: process.env.DB_HOSTNAME || process.env.DB_HOST || "127.0.0.1",
       user: process.env.DB_USERNAME || process.env.DB_USER || "root",
-      password: process.env.DB_PASSWORD || process.env.DB_CONNECTION_SECRET || "change-me",
+      password:
+        process.env.DB_PASSWORD ||
+        process.env.DB_CONNECTION_SECRET ||
+        "change-me",
       database: process.env.DB_NAME || "pizza",
       connectTimeout: 60000,
     },
