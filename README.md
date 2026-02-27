@@ -53,7 +53,7 @@ Install the required packages.
 npm install express jsonwebtoken mysql2 bcrypt
 ```
 
-Nodemon is assumed to be installed globally so that you can have hot reloading when debugging.
+Nodemon is assumed to be installed globally so that you can have hot reloading when debugging .
 
 ```sh
 npm -g install nodemon
