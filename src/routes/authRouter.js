@@ -33,6 +33,7 @@ authRouter.docs = [
 ];
 
 async function setAuthUser(req, res, next) {
+  console.log('[auth] middleware entered', req.method, req.path);
   const token = readAuthToken(req);
   if (token) {
     console.log('[auth] header detected', req.method, req.path);

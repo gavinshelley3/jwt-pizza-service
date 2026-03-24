@@ -7,6 +7,11 @@ const metrics = require('../metrics.js');
 
 const orderRouter = express.Router();
 
+orderRouter.use((req, res, next) => {
+  console.log('[route] order router hit', req.method, req.originalUrl || req.path);
+  next();
+});
+
 orderRouter.docs = [
   {
     method: 'GET',
