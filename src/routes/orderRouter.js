@@ -3,6 +3,7 @@ const config = require('../config.js');
 const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
+const metrics = require('../metrics.js');
 
 const orderRouter = express.Router();
 
@@ -79,13 +80,39 @@ orderRouter.post(
   asyncHandler(async (req, res) => {
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
-    const r = await fetch(`${config.factory.url}/api/order`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
-      body: JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }),
+    const payload = JSON.stringify({
+      diner: { id: req.user.id, name: req.user.name, email: req.user.email },
+      order,
     });
-    const j = await r.json();
-    if (r.ok) {
+    const pizzasOrdered = Array.isArray(order.items) ? order.items.length : 0;
+    const totalPrice = Array.isArray(order.items)
+      ? order.items.reduce((sum, item) => sum + (Number(item.price) || 0), 0)
+      : 0;
+    const startedAt = process.hrtime.bigint();
+    let response;
+    try {
+      response = await fetch(`${config.factory.url}/api/order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
+        body: payload,
+      });
+    } catch (error) {
+      const latencyMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+      metrics.pizzaPurchase({ success: false, latencyMs, pizzas: pizzasOrdered, revenue: 0 });
+      throw error;
+    }
+
+    const latencyMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+    const j = await response.json();
+
+    metrics.pizzaPurchase({
+      success: response.ok,
+      latencyMs,
+      pizzas: pizzasOrdered,
+      revenue: response.ok ? totalPrice : 0,
+    });
+
+    if (response.ok) {
       res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
     } else {
       res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });

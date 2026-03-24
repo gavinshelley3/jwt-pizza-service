@@ -22,6 +22,10 @@ jobs:
       DB_USER: root
       DB_CONNECTION_SECRET: ${{ secrets.DB_CONNECTION_SECRET }}
       DB_NAME: pizza
+      METRICS_ENDPOINT_URL: ${{ secrets.METRICS_ENDPOINT_URL }}
+      METRICS_ACCOUNT_ID: ${{ secrets.METRICS_ACCOUNT_ID }}
+      METRICS_API_KEY: ${{ secrets.METRICS_API_KEY }}
+      METRICS_SOURCE: jwt-pizza-service
     outputs:
       version: ${{ steps.set_version.outputs.version }}
     services:
