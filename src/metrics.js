@@ -98,6 +98,15 @@ class MetricsCollector {
     this.addSystemMetrics(metrics, timeUnixNano);
     this.addPizzaMetrics(metrics, timeUnixNano);
     this.addLatencyMetrics(metrics, timeUnixNano);
+    metrics.push(
+      createGaugeMetric(
+        'proof_of_new_metrics_code',
+        '1',
+        timeUnixNano,
+        123,
+        [{ key: 'source', value: { stringValue: this.config.source || 'unknown' } }]
+      )
+    );
 
     if (!metrics.length) {
       return;
@@ -126,6 +135,8 @@ class MetricsCollector {
         },
       ],
     };
+
+    console.log('[metrics] sending batch', metrics.map((m) => m.name));
 
     await fetch(this.config.endpointUrl, {
       method: 'POST',
