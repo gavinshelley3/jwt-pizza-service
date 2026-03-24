@@ -35,15 +35,22 @@ authRouter.docs = [
 async function setAuthUser(req, res, next) {
   const token = readAuthToken(req);
   if (token) {
+    console.log('[auth] header detected', req.method, req.path);
     try {
       if (await DB.isLoggedIn(token)) {
         // Check the database to make sure the token is valid.
         req.user = jwt.verify(token, config.jwtSecret);
         req.user.isRole = (role) => !!req.user.roles.find((r) => r.role === role);
+        console.log('[auth] user resolved', req.user.id, req.method, req.path);
+      } else {
+        console.log('[auth] token not found in DB', req.method, req.path);
       }
     } catch {
       req.user = null;
+      console.log('[auth] token verification failed', req.method, req.path);
     }
+  } else if (req.path?.startsWith('/api')) {
+    console.log('[auth] missing Authorization header', req.method, req.path);
   }
   next();
 }
