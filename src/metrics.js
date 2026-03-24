@@ -45,8 +45,9 @@ class MetricsCollector {
     this.requestTotals.total += 1;
     this.requestTotals.byMethod[method] = (this.requestTotals.byMethod[method] || 0) + 1;
 
-    if (req.user?.id) {
-      this.activeUsers.set(req.user.id, Date.now());
+    const userId = req.user?.id ?? req.user?.userId;
+    if (userId) {
+      this.activeUsers.set(userId, Date.now());
     }
 
     res.on('finish', () => {
@@ -181,9 +182,6 @@ class MetricsCollector {
   }
 
   addActiveUserMetric(metrics, timeUnixNano) {
-    if (!this.activeUsers.size) {
-      return;
-    }
     const cutoff = Date.now() - 5 * 60 * 1000;
     let activeCount = 0;
     for (const [userId, lastSeen] of this.activeUsers.entries()) {
