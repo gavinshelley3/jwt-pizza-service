@@ -54,6 +54,9 @@ class MetricsCollector {
       const userId = req.user?.id ?? req.user?.userId;
       if (userId) {
         this.activeUsers.set(userId, Date.now());
+        console.log('[metrics] active user resolved', userId, method, req.path);
+      } else {
+        console.log('[metrics] missing req.user', method, req.path);
       }
     });
 
