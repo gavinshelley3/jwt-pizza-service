@@ -45,19 +45,16 @@ class MetricsCollector {
     this.requestTotals.total += 1;
     this.requestTotals.byMethod[method] = (this.requestTotals.byMethod[method] || 0) + 1;
 
-    const userId = req.user?.id ?? req.user?.userId;
-    if (userId) {
-      console.log('[metrics] active user resolved', userId, req.method, req.path);
-      this.activeUsers.set(userId, Date.now());
-    } else if (req.path?.startsWith('/api')) {
-      console.log('[metrics] missing req.user for', req.method, req.path, 'auth:', req.headers.authorization);
-    }
-
     res.on('finish', () => {
       const end = process.hrtime.bigint();
       const durationMs = Number(end - start) / 1_000_000;
       this.httpLatency.totalMs += durationMs;
       this.httpLatency.count += 1;
+
+      const userId = req.user?.id ?? req.user?.userId;
+      if (userId) {
+        this.activeUsers.set(userId, Date.now());
+      }
     });
 
     next();
