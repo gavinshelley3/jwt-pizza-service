@@ -59,8 +59,10 @@ async function setAuthUser(req, res, next) {
 // Authenticate token
 authRouter.authenticateToken = (req, res, next) => {
   if (!req.user) {
+    metrics.recordAuthAttempt('token', false);
     return res.status(401).send({ message: 'unauthorized' });
   }
+  metrics.recordAuthAttempt('token', true);
   next();
 };
 

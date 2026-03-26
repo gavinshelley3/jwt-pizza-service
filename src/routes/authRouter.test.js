@@ -1,7 +1,17 @@
 const request = require("supertest");
+const metrics = require("../metrics.js");
 const { app, mockDb, Role, baseUser, authHeader, resetMocks } = require("./testUtils");
 
-beforeEach(resetMocks);
+let authAttemptSpy;
+
+beforeEach(() => {
+  resetMocks();
+  authAttemptSpy = jest.spyOn(metrics, "recordAuthAttempt");
+});
+
+afterEach(() => {
+  authAttemptSpy?.mockRestore();
+});
 
 describe("auth endpoints", () => {
   test("rejects registration with missing fields", async () => {
@@ -58,5 +68,19 @@ describe("auth endpoints", () => {
     expect(res.status).toBe(200);
     expect(res.body.message).toBe("logout successful");
     expect(mockDb.logoutUser).toHaveBeenCalledWith("valid.token.signature");
+  });
+
+  test("records failed auth attempts for missing tokens", async () => {
+    mockDb.isLoggedIn.mockResolvedValue(false);
+    const res = await request(app).delete("/api/auth");
+    expect(res.status).toBe(401);
+    expect(authAttemptSpy).toHaveBeenCalledWith("token", false);
+  });
+
+  test("records successful auth attempts when token is valid", async () => {
+    const header = authHeader(baseUser());
+    const res = await request(app).delete("/api/auth").set("Authorization", header);
+    expect(res.status).toBe(200);
+    expect(authAttemptSpy).toHaveBeenCalledWith("token", true);
   });
 });
