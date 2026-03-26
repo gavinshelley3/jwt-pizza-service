@@ -221,11 +221,12 @@ class LokiLogger {
   }
 
   async sendLogToGrafana(event) {
+    const authHeader = `Basic ${Buffer.from(`${this.config.accountId}:${this.config.apiKey}`).toString("base64")}`;
     const response = await fetch(this.config.endpointUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${this.config.accountId}:${this.config.apiKey}`,
+        Authorization: authHeader,
       },
       body: JSON.stringify(event),
       signal:
@@ -236,6 +237,11 @@ class LokiLogger {
 
     if (!response.ok) {
       const text = await response.text();
+      console.error("[logger] Loki push failed", {
+        status: response.status,
+        statusText: response.statusText,
+        body: text,
+      });
       throw new Error(`Grafana Loki error (${response.status}): ${text}`);
     }
   }
