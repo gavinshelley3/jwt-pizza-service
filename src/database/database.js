@@ -1,6 +1,7 @@
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 const config = require('../config.js');
+const logger = require('../logger.js');
 const { StatusCodeError } = require('../endpointHelper.js');
 const { Role } = require('../model/model.js');
 const dbModel = require('./dbModel.js');
@@ -357,12 +358,12 @@ class DB {
   }
 
   async query(connection, sql, params) {
-    const [results] = await connection.execute(sql, params);
+    const [results] = await this.executeWithLogging(connection, sql, params);
     return results;
   }
 
   async getID(connection, key, value, table) {
-    const [rows] = await connection.execute(`SELECT id FROM ${table} WHERE ${key}=?`, [value]);
+    const [rows] = await this.executeWithLogging(connection, `SELECT id FROM ${table} WHERE ${key}=?`, [value]);
     if (rows.length > 0) {
       return rows[0].id;
     }
@@ -420,8 +421,54 @@ class DB {
   }
 
   async checkDatabaseExists(connection) {
-    const [rows] = await connection.execute(`SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?`, [config.db.connection.database]);
+    const [rows] = await this.executeWithLogging(
+      connection,
+      `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?`,
+      [config.db.connection.database]
+    );
     return rows.length > 0;
+  }
+
+  async executeWithLogging(connection, sql, params) {
+    const start = process.hrtime.bigint();
+    let rows;
+    let error;
+    try {
+      rows = await connection.execute(sql, params);
+      return rows;
+    } catch (err) {
+      error = err;
+      throw err;
+    } finally {
+      const durationMs = Number(process.hrtime.bigint() - start) / 1_000_000;
+      const summary = this.describeDbResult(rows?.[0]);
+      logger.logDbQuery(sql, {
+        durationMs,
+        paramCount: Array.isArray(params) ? params.length : undefined,
+        rowCount: summary.rowCount,
+        affectedRows: summary.affectedRows,
+        insertId: summary.insertId,
+        success: !error,
+        error: error?.message,
+      });
+    }
+  }
+
+  describeDbResult(rows) {
+    if (!rows) {
+      return {};
+    }
+    if (Array.isArray(rows)) {
+      return { rowCount: rows.length };
+    }
+    const summary = {};
+    if (typeof rows.affectedRows === 'number') {
+      summary.affectedRows = rows.affectedRows;
+    }
+    if (typeof rows.insertId === 'number' && rows.insertId > 0) {
+      summary.insertId = rows.insertId;
+    }
+    return summary;
   }
 }
 

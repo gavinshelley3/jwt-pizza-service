@@ -1,0 +1,1557 @@
+annotations:
+  - kind: AnnotationQuery
+    spec:
+      builtIn: true
+      enable: true
+      hide: true
+      iconColor: rgba(0, 211, 255, 1)
+      name: Annotations & Alerts
+      query:
+        datasource:
+          name: "-- Grafana --"
+        group: grafana
+        kind: DataQuery
+        spec: {}
+        version: v0
+cursorSync: "Off"
+editable: true
+elements:
+  panel-10:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: avg(rate(service_latency_ms_milliseconds[1m]))
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 10
+      links: []
+      title: Service Latency
+      vizConfig:
+        group: stat
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+              calcs:
+                - lastNotNull
+              fields: ""
+              values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+        version: 13.0.0-23429090056.patch1
+  panel-11:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: avg(cpu_percent)
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 11
+      links: []
+      title: CPU Usage
+      vizConfig:
+        group: stat
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+              calcs:
+                - lastNotNull
+              fields: ""
+              values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+        version: 13.0.0-23429090056.patch1
+  panel-12:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: avg(memory_percent)
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 12
+      links: []
+      title: Memory Usage
+      vizConfig:
+        group: timeseries
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              custom:
+                axisBorderShow: false
+                axisCenteredZero: false
+                axisColorMode: text
+                axisLabel: ""
+                axisPlacement: auto
+                barAlignment: 0
+                barWidthFactor: 0.6
+                drawStyle: bars
+                fillOpacity: 100
+                gradientMode: hue
+                hideFrom:
+                  legend: false
+                  tooltip: false
+                  viz: false
+                insertNulls: false
+                lineInterpolation: linear
+                lineWidth: 1
+                pointSize: 5
+                scaleDistribution:
+                  type: linear
+                showPoints: auto
+                showValues: false
+                spanNulls: false
+                stacking:
+                  group: A
+                  mode: none
+                thresholdsStyle:
+                  mode: "off"
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            annotations:
+              clustering: -1
+              multiLane: false
+            legend:
+              calcs: []
+              displayMode: list
+              placement: bottom
+              showLegend: true
+            tooltip:
+              hideZeros: false
+              mode: single
+              sort: none
+        version: 13.0.0-23429090056.patch1
+  panel-13:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: sum(rate(pizzas_sold_total[1m]))
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 13
+      links: []
+      title: Pizzas Sold per Minute
+      vizConfig:
+        group: stat
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+              calcs:
+                - lastNotNull
+              fields: ""
+              values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+        version: 13.0.0-23429090056.patch1
+  panel-14:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: sum(rate(http_requests_by_method_total{method="POST"}[1m])) -sum(rate(pizzas_sold_total[1m]))
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 14
+      links: []
+      title: Pizza Creation Failures
+      vizConfig:
+        group: stat
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+              calcs:
+                - lastNotNull
+              fields: ""
+              values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+        version: 13.0.0-23429090056.patch1
+  panel-15:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: sum(rate(pizza_revenue_USD_total[1m]))
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 15
+      links: []
+      title: Revenue per Minute
+      vizConfig:
+        group: timeseries
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              custom:
+                axisBorderShow: false
+                axisCenteredZero: false
+                axisColorMode: text
+                axisLabel: ""
+                axisPlacement: auto
+                barAlignment: 0
+                barWidthFactor: 0.6
+                drawStyle: line
+                fillOpacity: 25
+                gradientMode: none
+                hideFrom:
+                  legend: false
+                  tooltip: false
+                  viz: false
+                insertNulls: false
+                lineInterpolation: linear
+                lineWidth: 1
+                pointSize: 5
+                scaleDistribution:
+                  type: linear
+                showPoints: auto
+                showValues: false
+                spanNulls: false
+                stacking:
+                  group: A
+                  mode: none
+                thresholdsStyle:
+                  mode: "off"
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            annotations:
+              clustering: -1
+              multiLane: false
+            legend:
+              calcs: []
+              displayMode: list
+              placement: bottom
+              showLegend: true
+            tooltip:
+              hideZeros: false
+              mode: single
+              sort: none
+        version: 13.0.0-23429090056.patch1
+  panel-16:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: avg_over_time(pizza_creation_latency_ms_milliseconds[5m])
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 16
+      links: []
+      title: Pizza Creation Latency
+      vizConfig:
+        group: timeseries
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              custom:
+                axisBorderShow: false
+                axisCenteredZero: false
+                axisColorMode: text
+                axisLabel: ""
+                axisPlacement: auto
+                barAlignment: 0
+                barWidthFactor: 0.6
+                drawStyle: line
+                fillOpacity: 0
+                gradientMode: none
+                hideFrom:
+                  legend: false
+                  tooltip: false
+                  viz: false
+                insertNulls: false
+                lineInterpolation: smooth
+                lineWidth: 1
+                pointSize: 5
+                scaleDistribution:
+                  type: linear
+                showPoints: auto
+                showValues: false
+                spanNulls: false
+                stacking:
+                  group: A
+                  mode: none
+                thresholdsStyle:
+                  mode: "off"
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            annotations:
+              clustering: -1
+              multiLane: false
+            legend:
+              calcs: []
+              displayMode: list
+              placement: bottom
+              showLegend: true
+            tooltip:
+              hideZeros: false
+              mode: single
+              sort: none
+        version: 13.0.0-23429090056.patch1
+  panel-17:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-logs
+                  group: loki
+                  kind: DataQuery
+                  spec:
+                    direction: backward
+                    editorMode: builder
+                    expr: '{component="$component"} |= `` | json'
+                    key: Q-f4aa6104-9703-4ed1-b42d-f2b2798b7cfb-0
+                    queryType: range
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations:
+            - kind: extractFields
+              spec:
+                id: extractFields
+                options:
+                  source: labels
+            - kind: organize
+              spec:
+                id: organize
+                options:
+                  includeByName:
+                    Line: true
+                    Time: true
+                    email: true
+                    name: true
+                    type: true
+                  indexByName:
+                    Line: 1
+                    Time: 0
+                    email: 4
+                    name: 3
+                    type: 2
+      description: ""
+      id: 17
+      links: []
+      title: Logs
+      vizConfig:
+        group: table
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              custom:
+                align: auto
+                cellOptions:
+                  type: auto
+                footer:
+                  reducers: []
+                inspect: false
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            cellHeight: sm
+            showHeader: true
+        version: 13.0.0-23429090056.patch1
+  panel-18:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-logs
+                  group: loki
+                  kind: DataQuery
+                  spec:
+                    direction: backward
+                    editorMode: code
+                    expr: '{component="$component"} | json | level =~ ".+" | type =~ ".+"'
+                    queryType: range
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 18
+      links: []
+      title: HTTP Request Logs
+      vizConfig:
+        group: logs
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults: {}
+            overrides: []
+          options:
+            dedupStrategy: none
+            enableInfiniteScrolling: false
+            enableLogDetails: true
+            prettifyLogMessage: true
+            showControls: false
+            showFieldSelector: false
+            showLevel: true
+            showTime: false
+            sortOrder: Descending
+            timestampResolution: ms
+            unwrappedColumns: false
+            wrapLogMessage: false
+        version: 13.0.0-23429090056.patch1
+  panel-19:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-logs
+                  group: loki
+                  kind: DataQuery
+                  spec:
+                    direction: backward
+                    editorMode: code
+                    expr: '{component="$component"} | json'
+                    legendFormat: ""
+                    queryType: range
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 19
+      links: []
+      title: JWT Pizza Logs
+      vizConfig:
+        group: logs
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults: {}
+            overrides: []
+          options:
+            dedupStrategy: none
+            enableInfiniteScrolling: false
+            enableLogDetails: true
+            prettifyLogMessage: true
+            showControls: false
+            showFieldSelector: false
+            showLabels: true
+            showLevel: true
+            showTime: true
+            sortOrder: Descending
+            timestampResolution: ms
+            unwrappedColumns: false
+            wrapLogMessage: false
+        version: 13.0.0-23429090056.patch1
+  panel-20:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-logs
+                  group: loki
+                  kind: DataQuery
+                  spec:
+                    direction: backward
+                    editorMode: code
+                    expr: '{component="$component"} | json'
+                    queryType: range
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations:
+            - kind: organize
+              spec:
+                id: organize
+                options:
+                  includeByName:
+                    Line: true
+                    Time: true
+                    level: true
+                    method: true
+                    path: true
+                    statusCode: true
+                    type: true
+                  indexByName:
+                    Time: 0
+                    level: 1
+                    message: 6
+                    method: 3
+                    path: 4
+                    statusCode: 5
+                    type: 2
+                  renameByName:
+                    Line: message
+      description: Parsed Loki entries including HTTP/db context
+      id: 20
+      links: []
+      title: HTTP + DB Logs Table
+      vizConfig:
+        group: table
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              custom:
+                align: auto
+                cellOptions:
+                  type: auto
+                footer:
+                  reducers: []
+                inspect: false
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            cellHeight: sm
+            showHeader: true
+        version: 13.0.0-23429090056.patch1
+  panel-21:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-logs
+                  group: loki
+                  kind: DataQuery
+                  spec:
+                    direction: backward
+                    editorMode: code
+                    expr: sum by (level) (count_over_time({component="$component"} [$__interval]))
+                    queryType: range
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: Counts of Loki events by severity
+      id: 21
+      links: []
+      title: Log Volume by Level
+      vizConfig:
+        group: timeseries
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              custom:
+                axisBorderShow: false
+                axisCenteredZero: false
+                axisColorMode: text
+                axisLabel: ""
+                axisPlacement: auto
+                barAlignment: 0
+                barWidthFactor: 0.6
+                drawStyle: line
+                fillOpacity: 15
+                gradientMode: none
+                hideFrom:
+                  legend: false
+                  tooltip: false
+                  viz: false
+                insertNulls: false
+                lineInterpolation: smooth
+                lineWidth: 2
+                pointSize: 4
+                scaleDistribution:
+                  type: linear
+                showPoints: never
+                showValues: false
+                spanNulls: false
+                stacking:
+                  group: A
+                  mode: none
+                thresholdsStyle:
+                  mode: "off"
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 1
+            overrides: []
+          options:
+            annotations:
+              clustering: -1
+              multiLane: false
+            legend:
+              calcs: []
+              displayMode: table
+              placement: bottom
+              showLegend: true
+            tooltip:
+              hideZeros: false
+              mode: multi
+              sort: none
+        version: 13.0.0-23429090056.patch1
+  panel-4:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: rate(requests_total[1m])
+                    instant: false
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: B
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: cpu_percent
+                    instant: false
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: rate(latency_milliseconds_total[1m])
+                    instant: false
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: C
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 4
+      links: []
+      title: requests_total, latency_millisecond_total, and cpu_percent
+      vizConfig:
+        group: timeseries
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              custom:
+                axisBorderShow: false
+                axisCenteredZero: false
+                axisColorMode: text
+                axisLabel: ""
+                axisPlacement: auto
+                barAlignment: 0
+                barWidthFactor: 0.6
+                drawStyle: line
+                fillOpacity: 0
+                gradientMode: none
+                hideFrom:
+                  legend: false
+                  tooltip: false
+                  viz: false
+                insertNulls: false
+                lineInterpolation: linear
+                lineWidth: 1
+                pointSize: 5
+                scaleDistribution:
+                  type: linear
+                showPoints: auto
+                showValues: false
+                spanNulls: false
+                stacking:
+                  group: A
+                  mode: none
+                thresholdsStyle:
+                  mode: "off"
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            annotations:
+              clustering: -1
+              multiLane: false
+            legend:
+              calcs: []
+              displayMode: list
+              placement: bottom
+              showLegend: true
+            tooltip:
+              hideZeros: false
+              mode: single
+              sort: none
+        version: 13.0.0-23429090056.patch1
+  panel-5:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: rate(http_requests_total[1m])
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: rate(http_requests_by_method_total{method="GET"}[1m])
+                    instant: false
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: B
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: rate(http_requests_by_method_total{method="POST"}[1m])
+                    instant: false
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: C
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: rate(http_requests_by_method_total{method="PUT"}[1m])
+                    instant: false
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: D
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: rate(http_requests_by_method_total{method="DELETE"}[1m])
+                    instant: false
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: E
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 5
+      links: []
+      title: HTTP Requests / Minute
+      vizConfig:
+        group: timeseries
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              custom:
+                axisBorderShow: false
+                axisCenteredZero: false
+                axisColorMode: text
+                axisLabel: ""
+                axisPlacement: auto
+                barAlignment: 0
+                barWidthFactor: 0.6
+                drawStyle: line
+                fillOpacity: 0
+                gradientMode: none
+                hideFrom:
+                  legend: false
+                  tooltip: false
+                  viz: false
+                insertNulls: false
+                lineInterpolation: linear
+                lineWidth: 1
+                pointSize: 5
+                scaleDistribution:
+                  type: linear
+                showPoints: auto
+                showValues: false
+                spanNulls: false
+                stacking:
+                  group: A
+                  mode: none
+                thresholdsStyle:
+                  mode: "off"
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            annotations:
+              clustering: -1
+              multiLane: false
+            legend:
+              calcs: []
+              displayMode: list
+              placement: bottom
+              showLegend: true
+            tooltip:
+              hideZeros: false
+              mode: single
+              sort: none
+        version: 13.0.0-23429090056.patch1
+  panel-6:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: sum(active_users_ratio)
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 6
+      links: []
+      title: Active users
+      vizConfig:
+        group: gauge
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: thresholds
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            barShape: flat
+            barWidthFactor: 0.5
+            effects:
+              barGlow: false
+              centerGlow: false
+              gradient: true
+            endpointMarker: point
+            minVizHeight: 75
+            minVizWidth: 75
+            orientation: auto
+            reduceOptions:
+              calcs:
+                - lastNotNull
+              fields: ""
+              values: false
+            segmentCount: 1
+            segmentSpacing: 0.3
+            shape: gauge
+            showThresholdLabels: false
+            showThresholdMarkers: true
+            sizing: auto
+            sparkline: true
+            textMode: auto
+        version: 13.0.0-23429090056.patch1
+  panel-7:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: sum(rate(http_requests_total[1m]))
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 7
+      links: []
+      title: HTTP Requests Total
+      vizConfig:
+        group: timeseries
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              custom:
+                axisBorderShow: false
+                axisCenteredZero: false
+                axisColorMode: text
+                axisLabel: ""
+                axisPlacement: auto
+                barAlignment: 0
+                barWidthFactor: 0.6
+                drawStyle: line
+                fillOpacity: 25
+                gradientMode: none
+                hideFrom:
+                  legend: false
+                  tooltip: false
+                  viz: false
+                insertNulls: false
+                lineInterpolation: linear
+                lineWidth: 1
+                pointSize: 5
+                scaleDistribution:
+                  type: linear
+                showPoints: auto
+                showValues: false
+                spanNulls: false
+                stacking:
+                  group: A
+                  mode: none
+                thresholdsStyle:
+                  mode: "off"
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            annotations:
+              clustering: -1
+              multiLane: false
+            legend:
+              calcs: []
+              displayMode: list
+              placement: bottom
+              showLegend: true
+            tooltip:
+              hideZeros: false
+              mode: single
+              sort: none
+        version: 13.0.0-23429090056.patch1
+  panel-8:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: sum by (method) (rate(http_requests_by_method_total[1m]))
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 8
+      links: []
+      title: Requests by Method (GET vs POST)
+      vizConfig:
+        group: timeseries
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              custom:
+                axisBorderShow: false
+                axisCenteredZero: false
+                axisColorMode: text
+                axisLabel: ""
+                axisPlacement: auto
+                barAlignment: 0
+                barWidthFactor: 0.6
+                drawStyle: line
+                fillOpacity: 0
+                gradientMode: none
+                hideFrom:
+                  legend: false
+                  tooltip: false
+                  viz: false
+                insertNulls: false
+                lineInterpolation: linear
+                lineWidth: 1
+                pointSize: 5
+                scaleDistribution:
+                  type: linear
+                showPoints: auto
+                showValues: false
+                spanNulls: false
+                stacking:
+                  group: A
+                  mode: none
+                thresholdsStyle:
+                  mode: "off"
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            annotations:
+              clustering: -1
+              multiLane: false
+            legend:
+              calcs: []
+              displayMode: list
+              placement: bottom
+              showLegend: true
+            tooltip:
+              hideZeros: false
+              mode: single
+              sort: none
+        version: 13.0.0-23429090056.patch1
+  panel-9:
+    kind: Panel
+    spec:
+      data:
+        kind: QueryGroup
+        spec:
+          queries:
+            - kind: PanelQuery
+              spec:
+                hidden: false
+                query:
+                  datasource:
+                    name: grafanacloud-prom
+                  group: prometheus
+                  kind: DataQuery
+                  spec:
+                    editorMode: code
+                    expr: sum by (result) (rate(http_requests_total[1m]))
+                    legendFormat: __auto
+                    range: true
+                  version: v0
+                refId: A
+          queryOptions: {}
+          transformations: []
+      description: ""
+      id: 9
+      links: []
+      title: Success vs Failure Rate
+      vizConfig:
+        group: gauge
+        kind: VizConfig
+        spec:
+          fieldConfig:
+            defaults:
+              color:
+                mode: palette-classic
+              thresholds:
+                mode: absolute
+                steps:
+                  - color: green
+                    value: 0
+                  - color: red
+                    value: 80
+            overrides: []
+          options:
+            barShape: flat
+            barWidthFactor: 0.3
+            effects:
+              barGlow: false
+              centerGlow: false
+              gradient: true
+            endpointMarker: point
+            minVizHeight: 75
+            minVizWidth: 75
+            orientation: auto
+            reduceOptions:
+              calcs:
+                - lastNotNull
+              fields: ""
+              values: false
+            segmentCount: 1
+            segmentSpacing: 0.3
+            shape: gauge
+            showThresholdLabels: false
+            showThresholdMarkers: false
+            sizing: auto
+            sparkline: true
+            textMode: auto
+        version: 13.0.0-23429090056.patch1
+layout:
+  kind: AutoGridLayout
+  spec:
+    columnWidthMode: standard
+    fillScreen: true
+    items:
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-17
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-19
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-7
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-8
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-5
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-4
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-6
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-9
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-11
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-13
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-10
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-15
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-12
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-16
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-14
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-18
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-20
+      - kind: AutoGridLayoutItem
+        spec:
+          element:
+            kind: ElementReference
+            name: panel-21
+    maxColumnCount: 3
+    rowHeightMode: standard
+links: []
+liveNow: false
+preload: false
+tags: []
+timeSettings:
+  autoRefresh: 5s
+  autoRefreshIntervals:
+    - 5s
+    - 10s
+    - 30s
+    - 1m
+    - 5m
+    - 15m
+    - 30m
+    - 1h
+    - 2h
+    - 1d
+  fiscalYearStartMonth: 0
+  from: now-1h
+  hideTimepicker: false
+  timezone: browser
+  to: now
+title: Pizza Dashboard
+variables: []

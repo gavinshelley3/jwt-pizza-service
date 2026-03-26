@@ -26,6 +26,10 @@ jobs:
       METRICS_ACCOUNT_ID: ${{ secrets.METRICS_ACCOUNT_ID }}
       METRICS_API_KEY: ${{ secrets.METRICS_API_KEY }}
       METRICS_SOURCE: jwt-pizza-service
+      LOGGING_ENDPOINT_URL: ${{ secrets.LOGGING_ENDPOINT_URL }}
+      LOGGING_ACCOUNT_ID: ${{ secrets.LOGGING_ACCOUNT_ID }}
+      LOGGING_API_KEY: ${{ secrets.LOGGING_API_KEY }}
+      LOGGING_SOURCE: jwt-pizza-service-ci
     outputs:
       version: ${{ steps.set_version.outputs.version }}
     services:

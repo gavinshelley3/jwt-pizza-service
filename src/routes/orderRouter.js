@@ -4,8 +4,17 @@ const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
 const metrics = require('../metrics.js');
+const logger = require('../logger.js');
 
 const orderRouter = express.Router();
+
+const parseJsonOrText = (text) => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
 
 orderRouter.use((req, res, next) => {
   console.log('[route] order router hit', req.method, req.originalUrl || req.path);
@@ -85,10 +94,10 @@ orderRouter.post(
   asyncHandler(async (req, res) => {
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
-    const payload = JSON.stringify({
+    const factoryPayload = {
       diner: { id: req.user.id, name: req.user.name, email: req.user.email },
       order,
-    });
+    };
     const pizzasOrdered = Array.isArray(order.items) ? order.items.length : 0;
     const totalPrice = Array.isArray(order.items)
       ? order.items.reduce((sum, item) => sum + (Number(item.price) || 0), 0)
@@ -99,28 +108,54 @@ orderRouter.post(
       response = await fetch(`${config.factory.url}/api/order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
-        body: payload,
+        body: JSON.stringify(factoryPayload),
       });
+      const latencyMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+      const responseText = await response.text();
+      const parsedResponse = parseJsonOrText(responseText);
+
+      logger.logFactoryRequest({
+        latencyMs,
+        status: response.status,
+        success: response.ok,
+        requestBody: factoryPayload,
+        responseBody: parsedResponse,
+        dinerId: req.user.id,
+        franchiseId: order.franchiseId,
+        storeId: order.storeId,
+      });
+
+      metrics.pizzaPurchase({
+        success: response.ok,
+        latencyMs,
+        pizzas: pizzasOrdered,
+        revenue: response.ok ? totalPrice : 0,
+      });
+
+      if (response.ok) {
+        const followData = typeof parsedResponse === 'object' && parsedResponse !== null ? parsedResponse : {};
+        res.send({ order, followLinkToEndChaos: followData.reportUrl, jwt: followData.jwt });
+      } else {
+        const followData = typeof parsedResponse === 'object' && parsedResponse !== null ? parsedResponse : {};
+        res.status(500).send({
+          message: 'Failed to fulfill order at factory',
+          followLinkToEndChaos: followData.reportUrl,
+        });
+      }
     } catch (error) {
       const latencyMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+      logger.logFactoryRequest({
+        latencyMs,
+        status: response?.status,
+        success: false,
+        requestBody: factoryPayload,
+        responseBody: error.message,
+        dinerId: req.user.id,
+        franchiseId: order.franchiseId,
+        storeId: order.storeId,
+      });
       metrics.pizzaPurchase({ success: false, latencyMs, pizzas: pizzasOrdered, revenue: 0 });
       throw error;
-    }
-
-    const latencyMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
-    const j = await response.json();
-
-    metrics.pizzaPurchase({
-      success: response.ok,
-      latencyMs,
-      pizzas: pizzasOrdered,
-      revenue: response.ok ? totalPrice : 0,
-    });
-
-    if (response.ok) {
-      res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
-    } else {
-      res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
     }
   })
 );

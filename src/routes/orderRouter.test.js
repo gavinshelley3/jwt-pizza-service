@@ -66,7 +66,8 @@ describe("order endpoints", () => {
     mockDb.addDinerOrder.mockResolvedValue({ id: 5, items: [] });
     global.fetch.mockResolvedValue({
       ok: true,
-      json: async () => ({ reportUrl: "http://report", jwt: "factory-jwt" }),
+      status: 200,
+      text: async () => JSON.stringify({ reportUrl: "http://report", jwt: "factory-jwt" }),
     });
 
     const res = await request(app)
@@ -87,7 +88,8 @@ describe("order endpoints", () => {
     mockDb.addDinerOrder.mockResolvedValue({ id: 7, items: [] });
     global.fetch.mockResolvedValue({
       ok: false,
-      json: async () => ({ reportUrl: "http://fail" }),
+      status: 500,
+      text: async () => JSON.stringify({ reportUrl: "http://fail" }),
     });
 
     const res = await request(app)
