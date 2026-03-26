@@ -29,7 +29,7 @@ jobs:
       LOGGING_ENDPOINT_URL: ${{ secrets.LOGGING_ENDPOINT_URL }}
       LOGGING_ACCOUNT_ID: ${{ secrets.LOGGING_ACCOUNT_ID }}
       LOGGING_API_KEY: ${{ secrets.LOGGING_API_KEY }}
-      LOGGING_SOURCE: jwt-pizza-service-ci
+      LOGGING_SOURCE: jwt-pizza-service
     outputs:
       version: ${{ steps.set_version.outputs.version }}
     services:
