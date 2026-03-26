@@ -59,6 +59,7 @@ app.use("*", (req, res) => {
 });
 
 // Default error handler for all exceptions and errors.
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   logger.logException(err, {
     path: req.originalUrl || req.url,

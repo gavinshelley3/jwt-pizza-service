@@ -159,7 +159,7 @@ class LokiLogger {
     try {
       const masked = this.maskSecrets(payload);
       return typeof masked === "string" ? masked : JSON.stringify(masked);
-    } catch (error) {
+    } catch {
       return this.serialize(payload);
     }
   }
@@ -217,7 +217,7 @@ class LokiLogger {
     }
     return value
       .replace(/("password"\s*:\s*")([^"]*)(")/gi, '$1*****$3')
-      .replace(/(\\\"password\\\"\s*:\s*\\")(.*?)(\\")/gi, '$1*****$3');
+      .replace(/(\\"password\\"\s*:\s*\\")(.*?)(\\")/gi, '$1*****$3');
   }
 
   async sendLogToGrafana(event) {
