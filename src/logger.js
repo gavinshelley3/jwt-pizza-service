@@ -63,10 +63,15 @@ class LokiLogger {
       return;
     }
 
-    const valueEntry = [this.nowString(), this.sanitize(payload)];
+    let linePayload = payload;
     if (metadata && this.hasMetadata(metadata)) {
-      valueEntry.push(metadata);
+      if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+        linePayload = { ...payload, ...metadata };
+      } else {
+        linePayload = { message: payload, ...metadata };
+      }
     }
+    const valueEntry = [this.nowString(), this.sanitize(linePayload)];
 
     const event = {
       streams: [
@@ -222,6 +227,10 @@ class LokiLogger {
 
   async sendLogToGrafana(event) {
     const authHeader = `Basic ${Buffer.from(`${this.config.accountId}:${this.config.apiKey}`).toString("base64")}`;
+    console.log("[logger] Loki push payload", {
+      endpoint: this.config.endpointUrl,
+      event,
+    });
     const response = await fetch(this.config.endpointUrl, {
       method: "POST",
       headers: {
@@ -235,13 +244,13 @@ class LokiLogger {
           : undefined,
     });
 
+    const text = await response.text();
+    console.log("[logger] Loki push response", {
+      status: response.status,
+      statusText: response.statusText,
+      body: text,
+    });
     if (!response.ok) {
-      const text = await response.text();
-      console.error("[logger] Loki push failed", {
-        status: response.status,
-        statusText: response.statusText,
-        body: text,
-      });
       throw new Error(`Grafana Loki error (${response.status}): ${text}`);
     }
   }
