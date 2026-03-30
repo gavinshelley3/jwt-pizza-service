@@ -7,6 +7,18 @@ class LokiLogger {
     this.enabled = Boolean(
       this.config.endpointUrl && this.config.accountId && this.config.apiKey
     );
+    this.disabledWarningEmitted = false;
+
+    const diagnostics = {
+      endpointPresent: Boolean(this.config.endpointUrl),
+      accountIdPresent: Boolean(this.config.accountId),
+      apiKeyPresent: Boolean(this.config.apiKey),
+      source: this.source,
+    };
+    console.log("[logger] logging status", {
+      enabled: this.enabled,
+      ...diagnostics,
+    });
 
     if (!this.enabled) {
       console.warn(
@@ -60,6 +72,10 @@ class LokiLogger {
 
   log(level = "info", type = "custom", payload = {}, metadata = undefined) {
     if (!this.enabled) {
+      if (!this.disabledWarningEmitted) {
+        this.disabledWarningEmitted = true;
+        console.warn("[logger] logging disabled; log request dropped");
+      }
       return;
     }
 
@@ -227,6 +243,7 @@ class LokiLogger {
 
   async sendLogToGrafana(event) {
     const authHeader = `Basic ${Buffer.from(`${this.config.accountId}:${this.config.apiKey}`).toString("base64")}`;
+    console.log("[logger] Loki push attempt");
     console.log("[logger] Loki push payload", {
       endpoint: this.config.endpointUrl,
       event,
