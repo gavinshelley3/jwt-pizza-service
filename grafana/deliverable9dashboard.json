@@ -5,8 +5,8 @@
     "name": "gab65zj",
     "namespace": "stacks-1567412",
     "uid": "cb8217da-2d85-4488-a1b0-86d71c7ae32e",
-    "resourceVersion": "1774463632991118",
-    "generation": 36,
+    "resourceVersion": "1774906086399771",
+    "generation": 126,
     "creationTimestamp": "2026-03-21T22:07:57Z",
     "labels": {
       "grafana.app/deprecatedInternalID": "4355116437037056"
@@ -16,7 +16,7 @@
       "grafana.app/folder": "",
       "grafana.app/saved-from-ui": "Grafana Cloud (steady)",
       "grafana.app/updatedBy": "user:cfgq34ueb52psd",
-      "grafana.app/updatedTimestamp": "2026-03-25T18:33:52Z"
+      "grafana.app/updatedTimestamp": "2026-03-30T21:28:06Z"
     }
   },
   "spec": {
@@ -48,8 +48,8 @@
         "kind": "Panel",
         "spec": {
           "id": 10,
-          "title": "Service Latency",
-          "description": "",
+          "title": "Service Endpoint Latency",
+          "description": "Average service response time over the last 5 minutes.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -67,7 +67,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "avg(rate(service_latency_ms_milliseconds[1m]))",
+                        "expr": "avg_over_time(service_latency_ms_milliseconds[5m])",
                         "legendFormat": "__auto",
                         "range": true
                       }
@@ -84,7 +84,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.0.0-23429090056.patch1",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
                 "colorMode": "value",
@@ -103,6 +103,8 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "unit": "ms",
+                  "decimals": 2,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -111,7 +113,15 @@
                         "color": "green"
                       },
                       {
-                        "value": 80,
+                        "value": 25,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 50,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 100,
                         "color": "red"
                       }
                     ]
@@ -130,8 +140,8 @@
         "kind": "Panel",
         "spec": {
           "id": 11,
-          "title": "CPU Usage",
-          "description": "",
+          "title": "CPU Usage %",
+          "description": "Current CPU utilization percentage of the service.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -166,7 +176,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.0.0-23429090056.patch1",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
                 "colorMode": "value",
@@ -185,6 +195,8 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "unit": "percent",
+                  "min": 0,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -193,131 +205,17 @@
                         "color": "green"
                       },
                       {
-                        "value": 80,
+                        "value": 50,
+                        "color": "#EAB839"
+                      },
+                      {
+                        "value": 75,
                         "color": "red"
                       }
                     ]
                   },
                   "color": {
                     "mode": "palette-classic"
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "panel-12": {
-        "kind": "Panel",
-        "spec": {
-          "id": 12,
-          "title": "Memory Usage",
-          "description": "",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-prom"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "avg(memory_percent)",
-                        "legendFormat": "__auto",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "13.0.0-23429090056.patch1",
-            "spec": {
-              "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "barWidthFactor": 0.6,
-                    "drawStyle": "bars",
-                    "fillOpacity": 100,
-                    "gradientMode": "hue",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
-                    },
-                    "insertNulls": false,
-                    "lineInterpolation": "linear",
-                    "lineWidth": 1,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "auto",
-                    "showValues": false,
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
                   }
                 },
                 "overrides": []
@@ -331,7 +229,7 @@
         "spec": {
           "id": 13,
           "title": "Pizzas Sold per Minute",
-          "description": "",
+          "description": "Number of pizzas created per minute across the service.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -349,7 +247,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(rate(pizzas_sold_total[1m]))",
+                        "expr": "sum(rate(pizzas_sold_total[1m])) * 60",
                         "legendFormat": "__auto",
                         "range": true
                       }
@@ -366,11 +264,11 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.0.0-23429090056.patch1",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
                 "colorMode": "value",
-                "graphMode": "area",
+                "graphMode": "none",
                 "justifyMode": "auto",
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
@@ -385,21 +283,30 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "unit": "pizzas/min",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
                       {
                         "value": 0,
-                        "color": "green"
+                        "color": "red"
                       },
                       {
-                        "value": 80,
-                        "color": "red"
+                        "value": 1,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 2,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 3,
+                        "color": "green"
                       }
                     ]
                   },
                   "color": {
-                    "mode": "palette-classic"
+                    "mode": "thresholds"
                   }
                 },
                 "overrides": []
@@ -413,7 +320,7 @@
         "spec": {
           "id": 14,
           "title": "Pizza Creation Failures",
-          "description": "",
+          "description": "Estimates failed pizza creation attempts per minute by subtracting successful pizza creations from POST creation requests.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -431,7 +338,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(rate(http_requests_by_method_total{method=\"POST\"}[1m])) -sum(rate(pizzas_sold_total[1m]))",
+                        "expr": "clamp_min((sum(rate(http_requests_by_method_total{method=\"POST\"}[1m])) - sum(rate(pizzas_sold_total[1m]))) * 60, 0)",
                         "legendFormat": "__auto",
                         "range": true
                       }
@@ -448,11 +355,11 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.0.0-23429090056.patch1",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
                 "colorMode": "value",
-                "graphMode": "area",
+                "graphMode": "none",
                 "justifyMode": "auto",
                 "orientation": "auto",
                 "percentChangeColorMode": "standard",
@@ -467,6 +374,7 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "unit": "failures/min",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -475,13 +383,21 @@
                         "color": "green"
                       },
                       {
-                        "value": 80,
+                        "value": 1,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 2,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 3,
                         "color": "red"
                       }
                     ]
                   },
                   "color": {
-                    "mode": "palette-classic"
+                    "mode": "thresholds"
                   }
                 },
                 "overrides": []
@@ -495,7 +411,7 @@
         "spec": {
           "id": 15,
           "title": "Revenue per Minute",
-          "description": "",
+          "description": "Displays total revenue generated per minute based on successful pizza sales.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -513,7 +429,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(rate(pizza_revenue_USD_total[1m]))",
+                        "expr": "sum(rate(pizza_revenue_USD_total[1m])) * 60",
                         "legendFormat": "__auto",
                         "range": true
                       }
@@ -530,7 +446,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.0-23429090056.patch1",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
                 "annotations": {
@@ -551,6 +467,8 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "displayName": "Revenue per Minute",
+                  "unit": "currencyUSD",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -613,7 +531,7 @@
         "spec": {
           "id": 16,
           "title": "Pizza Creation Latency",
-          "description": "",
+          "description": "Displays the most recent pizza creation latency.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -631,7 +549,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "avg_over_time(pizza_creation_latency_ms_milliseconds[5m])",
+                        "expr": "last_over_time(pizza_creation_latency_ms_milliseconds[10m])",
                         "legendFormat": "__auto",
                         "range": true
                       }
@@ -647,28 +565,28 @@
           },
           "vizConfig": {
             "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "13.0.0-23429090056.patch1",
+            "group": "stat",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": ["lastNotNull"],
+                  "fields": "",
+                  "values": false
                 },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
               },
               "fieldConfig": {
                 "defaults": {
+                  "unit": "ms",
+                  "decimals": 2,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -677,290 +595,23 @@
                         "color": "green"
                       },
                       {
-                        "value": 80,
+                        "value": 50,
+                        "color": "yellow"
+                      },
+                      {
+                        "value": 100,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 200,
                         "color": "red"
                       }
                     ]
                   },
                   "color": {
                     "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "barWidthFactor": 0.6,
-                    "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
-                    },
-                    "insertNulls": false,
-                    "lineInterpolation": "smooth",
-                    "lineWidth": 1,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "auto",
-                    "showValues": false,
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
                   }
                 },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "panel-17": {
-        "kind": "Panel",
-        "spec": {
-          "id": 17,
-          "title": "Logs",
-          "description": "",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "loki",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-logs"
-                      },
-                      "spec": {
-                        "direction": "backward",
-                        "editorMode": "builder",
-                        "expr": "{component=\"$component\"} |= `` | json",
-                        "key": "Q-f4aa6104-9703-4ed1-b42d-f2b2798b7cfb-0",
-                        "queryType": "range"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [
-                {
-                  "kind": "extractFields",
-                  "spec": {
-                    "id": "extractFields",
-                    "options": {
-                      "source": "labels"
-                    }
-                  }
-                },
-                {
-                  "kind": "organize",
-                  "spec": {
-                    "id": "organize",
-                    "options": {
-                      "includeByName": {
-                        "Line": true,
-                        "Time": true,
-                        "email": true,
-                        "name": true,
-                        "type": true
-                      },
-                      "indexByName": {
-                        "Line": 1,
-                        "Time": 0,
-                        "email": 4,
-                        "name": 3,
-                        "type": 2
-                      }
-                    }
-                  }
-                }
-              ],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "table",
-            "version": "13.0.0-23429090056.patch1",
-            "spec": {
-              "options": {
-                "cellHeight": "sm",
-                "showHeader": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "custom": {
-                    "align": "auto",
-                    "cellOptions": {
-                      "type": "auto"
-                    },
-                    "footer": {
-                      "reducers": []
-                    },
-                    "inspect": false
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "panel-18": {
-        "kind": "Panel",
-        "spec": {
-          "id": 18,
-          "title": "HTTP Request Logs",
-          "description": "",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "loki",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-logs"
-                      },
-                      "spec": {
-                        "direction": "backward",
-                        "editorMode": "code",
-                        "expr": "{component=\"$component\"} | json | level =~ \".+\" | type =~ \".+\"",
-                        "queryType": "range"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "logs",
-            "version": "13.0.0-23429090056.patch1",
-            "spec": {
-              "options": {
-                "dedupStrategy": "none",
-                "enableInfiniteScrolling": false,
-                "enableLogDetails": true,
-                "prettifyLogMessage": true,
-                "showControls": false,
-                "showFieldSelector": false,
-                "showLevel": true,
-                "showTime": false,
-                "sortOrder": "Descending",
-                "timestampResolution": "ms",
-                "unwrappedColumns": false,
-                "wrapLogMessage": false
-              },
-              "fieldConfig": {
-                "defaults": {},
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "panel-19": {
-        "kind": "Panel",
-        "spec": {
-          "id": 19,
-          "title": "JWT Pizza Logs",
-          "description": "",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "loki",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-logs"
-                      },
-                      "spec": {
-                        "direction": "backward",
-                        "editorMode": "code",
-                        "expr": "{component=\"$component\"} | json",
-                        "legendFormat": "",
-                        "queryType": "range"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "logs",
-            "version": "13.0.0-23429090056.patch1",
-            "spec": {
-              "options": {
-                "dedupStrategy": "none",
-                "enableInfiniteScrolling": false,
-                "enableLogDetails": true,
-                "prettifyLogMessage": true,
-                "showControls": false,
-                "showFieldSelector": false,
-                "showLabels": true,
-                "showLevel": true,
-                "showTime": true,
-                "sortOrder": "Descending",
-                "timestampResolution": "ms",
-                "unwrappedColumns": false,
-                "wrapLogMessage": false
-              },
-              "fieldConfig": {
-                "defaults": {},
                 "overrides": []
               }
             }
@@ -971,8 +622,8 @@
         "kind": "Panel",
         "spec": {
           "id": 20,
-          "title": "HTTP + DB Logs Table",
-          "description": "Parsed Loki entries including HTTP/db context",
+          "title": "HTTP Request Logs",
+          "description": "Real time view of incoming API requests including method, route, status code, and response time. Useful for spotting slow endpoints and failed requests.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -991,7 +642,7 @@
                       "spec": {
                         "direction": "backward",
                         "editorMode": "code",
-                        "expr": "{component=\"$component\"} | json",
+                        "expr": "{component=\"jwt-pizza-service\", type=\"http-req\"}\r\n| json\r\n| line_format \"{{.method}} {{.path}} → {{.statusCode}} ({{.durationMs}}ms)\"",
                         "queryType": "range"
                       }
                     },
@@ -1036,51 +687,41 @@
           },
           "vizConfig": {
             "kind": "VizConfig",
-            "group": "table",
-            "version": "13.0.0-23429090056.patch1",
+            "group": "logs",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
-                "cellHeight": "sm",
-                "showHeader": true
+                "dedupStrategy": "numbers",
+                "detailsMode": "inline",
+                "enableInfiniteScrolling": false,
+                "enableLogDetails": true,
+                "prettifyLogMessage": true,
+                "showControls": false,
+                "showFieldSelector": false,
+                "showLabels": false,
+                "showLevel": true,
+                "showLogAttributes": true,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "syntaxHighlighting": true,
+                "timestampResolution": "ms",
+                "unwrappedColumns": true,
+                "wrapLogMessage": true
               },
               "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "custom": {
-                    "align": "auto",
-                    "cellOptions": {
-                      "type": "auto"
-                    },
-                    "footer": {
-                      "reducers": []
-                    },
-                    "inspect": false
-                  }
-                },
+                "defaults": {},
                 "overrides": []
               }
             }
           }
         }
       },
-      "panel-21": {
+      "panel-22": {
         "kind": "Panel",
         "spec": {
-          "id": 21,
-          "title": "Log Volume by Level",
-          "description": "Counts of Loki events by severity",
+          "id": 22,
+          "title": "Authentication Attempts per Minute",
+          "description": "Shows authentication attempt rates per second, split into successful and failed attempts using Prometheus rate metrics.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1091,19 +732,42 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "loki",
+                      "group": "prometheus",
                       "version": "v0",
                       "datasource": {
-                        "name": "grafanacloud-logs"
+                        "name": "grafanacloud-prom"
                       },
                       "spec": {
-                        "direction": "backward",
                         "editorMode": "code",
-                        "expr": "sum by (level) (count_over_time({component=\"$component\"} [$__interval]))",
-                        "queryType": "range"
+                        "exemplar": false,
+                        "expr": "sum(rate(auth_attempts_total{result=\"success\"}[1m]))",
+                        "legendFormat": "__auto",
+                        "range": true
                       }
                     },
                     "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "grafanacloud-prom"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(rate(auth_attempts_total{result=\"failure\"}[1m]))",
+                        "instant": false,
+                        "legendFormat": "__auto",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -1115,7 +779,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.0-23429090056.patch1",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
                 "annotations": {
@@ -1124,7 +788,7 @@
                 },
                 "legend": {
                   "calcs": [],
-                  "displayMode": "table",
+                  "displayMode": "list",
                   "placement": "bottom",
                   "showLegend": true
                 },
@@ -1136,6 +800,7 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "unit": "req/s",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -1144,7 +809,7 @@
                         "color": "green"
                       },
                       {
-                        "value": 1,
+                        "value": 80,
                         "color": "red"
                       }
                     ]
@@ -1169,13 +834,13 @@
                       "viz": false
                     },
                     "insertNulls": false,
-                    "lineInterpolation": "smooth",
+                    "lineInterpolation": "linear",
                     "lineWidth": 2,
-                    "pointSize": 4,
+                    "pointSize": 5,
                     "scaleDistribution": {
                       "type": "linear"
                     },
-                    "showPoints": "never",
+                    "showPoints": "auto",
                     "showValues": false,
                     "spanNulls": false,
                     "stacking": {
@@ -1187,18 +852,57 @@
                     }
                   }
                 },
-                "overrides": []
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "A"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Success"
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "green",
+                          "mode": "shades"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "B"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Failure"
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "red",
+                          "mode": "shades"
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
             }
           }
         }
       },
-      "panel-4": {
+      "panel-23": {
         "kind": "Panel",
         "spec": {
-          "id": 4,
-          "title": "requests_total, latency_millisecond_total, and cpu_percent",
-          "description": "",
+          "id": 23,
+          "title": "Memory Usage %",
+          "description": "Displays average memory usage percentage across the service instances.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1216,57 +920,12 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "rate(requests_total[1m])",
-                        "instant": false,
-                        "legendFormat": "__auto",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-prom"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "cpu_percent",
-                        "instant": false,
+                        "expr": "avg(memory_percent)",
                         "legendFormat": "__auto",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-prom"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "rate(latency_milliseconds_total[1m])",
-                        "instant": false,
-                        "legendFormat": "__auto",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
                     "hidden": false
                   }
                 }
@@ -1278,7 +937,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.0-23429090056.patch1",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
                 "annotations": {
@@ -1299,6 +958,8 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "displayName": "Memory Usage",
+                  "unit": "percent",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -1313,18 +974,19 @@
                     ]
                   },
                   "color": {
-                    "mode": "palette-classic"
+                    "mode": "fixed",
+                    "fixedColor": "light-blue"
                   },
                   "custom": {
                     "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
-                    "axisLabel": "",
+                    "axisLabel": "Memory %",
                     "axisPlacement": "auto",
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
-                    "fillOpacity": 0,
+                    "fillOpacity": 15,
                     "gradientMode": "none",
                     "hideFrom": {
                       "legend": false,
@@ -1333,7 +995,7 @@
                     },
                     "insertNulls": false,
                     "lineInterpolation": "linear",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "pointSize": 5,
                     "scaleDistribution": {
                       "type": "linear"
@@ -1356,12 +1018,12 @@
           }
         }
       },
-      "panel-5": {
+      "panel-24": {
         "kind": "Panel",
         "spec": {
-          "id": 5,
-          "title": "HTTP Requests / Minute",
-          "description": "",
+          "id": 24,
+          "title": "Database Logs",
+          "description": "Shows executed SQL queries with duration and row counts. Helps identify slow queries and understand database activity.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1372,190 +1034,275 @@
                   "spec": {
                     "query": {
                       "kind": "DataQuery",
-                      "group": "prometheus",
+                      "group": "loki",
                       "version": "v0",
                       "datasource": {
-                        "name": "grafanacloud-prom"
+                        "name": "grafanacloud-logs"
                       },
                       "spec": {
+                        "direction": "backward",
                         "editorMode": "code",
-                        "expr": "rate(http_requests_total[1m])",
-                        "legendFormat": "__auto",
-                        "range": true
+                        "expr": "{component=\"jwt-pizza-service\", type=\"db-query\"}\r\n| json\r\n| line_format \"{{.durationMs}}ms | rows={{.rowCount}} | {{.sql}}\"",
+                        "queryType": "range"
                       }
                     },
                     "refId": "A",
                     "hidden": false
                   }
-                },
+                }
+              ],
+              "transformations": [
                 {
-                  "kind": "PanelQuery",
+                  "kind": "organize",
                   "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-prom"
+                    "id": "organize",
+                    "options": {
+                      "includeByName": {
+                        "Line": true,
+                        "Time": true,
+                        "level": true,
+                        "method": true,
+                        "path": true,
+                        "statusCode": true,
+                        "type": true
                       },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "rate(http_requests_by_method_total{method=\"GET\"}[1m])",
-                        "instant": false,
-                        "legendFormat": "__auto",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-prom"
+                      "indexByName": {
+                        "Time": 0,
+                        "level": 1,
+                        "message": 6,
+                        "method": 3,
+                        "path": 4,
+                        "statusCode": 5,
+                        "type": 2
                       },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "rate(http_requests_by_method_total{method=\"POST\"}[1m])",
-                        "instant": false,
-                        "legendFormat": "__auto",
-                        "range": true
+                      "renameByName": {
+                        "Line": "message"
                       }
-                    },
-                    "refId": "C",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-prom"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "rate(http_requests_by_method_total{method=\"PUT\"}[1m])",
-                        "instant": false,
-                        "legendFormat": "__auto",
-                        "range": true
-                      }
-                    },
-                    "refId": "D",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-prom"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "rate(http_requests_by_method_total{method=\"DELETE\"}[1m])",
-                        "instant": false,
-                        "legendFormat": "__auto",
-                        "range": true
-                      }
-                    },
-                    "refId": "E",
-                    "hidden": false
+                    }
                   }
                 }
               ],
-              "transformations": [],
               "queryOptions": {}
             }
           },
           "vizConfig": {
             "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "13.0.0-23429090056.patch1",
+            "group": "logs",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
-                "annotations": {
-                  "clustering": -1,
-                  "multiLane": false
-                },
-                "legend": {
-                  "calcs": [],
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
+                "dedupStrategy": "none",
+                "detailsMode": "inline",
+                "enableInfiniteScrolling": false,
+                "enableLogDetails": true,
+                "prettifyLogMessage": true,
+                "showControls": false,
+                "showFieldSelector": false,
+                "showLevel": true,
+                "showLogAttributes": true,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "syntaxHighlighting": true,
+                "timestampResolution": "ms",
+                "unwrappedColumns": false,
+                "wrapLogMessage": true
               },
               "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
+                "defaults": {},
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-27": {
+        "kind": "Panel",
+        "spec": {
+          "id": 27,
+          "title": "Unhandled Exception Logs",
+          "description": "Displays server side exceptions with route and error message. Use this to quickly identify and debug application failures.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "loki",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "grafanacloud-logs"
                       },
-                      {
-                        "value": 80,
-                        "color": "red"
+                      "spec": {
+                        "direction": "backward",
+                        "editorMode": "code",
+                        "expr": "{component=\"jwt-pizza-service\", type=\"unhandled-exception\"}\r\n| json\r\n| line_format \"❌ {{.method}} {{.path}} → {{.message}}\"",
+                        "queryType": "range"
                       }
-                    ]
-                  },
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "barWidthFactor": 0.6,
-                    "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
                     },
-                    "insertNulls": false,
-                    "lineInterpolation": "linear",
-                    "lineWidth": 1,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "auto",
-                    "showValues": false,
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [
+                {
+                  "kind": "organize",
+                  "spec": {
+                    "id": "organize",
+                    "options": {
+                      "includeByName": {
+                        "Line": true,
+                        "Time": true,
+                        "level": true,
+                        "method": true,
+                        "path": true,
+                        "statusCode": true,
+                        "type": true
+                      },
+                      "indexByName": {
+                        "Time": 0,
+                        "level": 1,
+                        "message": 6,
+                        "method": 3,
+                        "path": 4,
+                        "statusCode": 5,
+                        "type": 2
+                      },
+                      "renameByName": {
+                        "Line": "message"
+                      }
                     }
                   }
-                },
+                }
+              ],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "logs",
+            "version": "13.0.0-23429090056.patch4",
+            "spec": {
+              "options": {
+                "dedupStrategy": "none",
+                "detailsMode": "inline",
+                "enableInfiniteScrolling": false,
+                "enableLogDetails": true,
+                "prettifyLogMessage": true,
+                "showControls": false,
+                "showFieldSelector": false,
+                "showLevel": true,
+                "showLogAttributes": true,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "syntaxHighlighting": true,
+                "timestampResolution": "ms",
+                "unwrappedColumns": false,
+                "wrapLogMessage": true
+              },
+              "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-28": {
+        "kind": "Panel",
+        "spec": {
+          "id": 28,
+          "title": "Factory Service Logs",
+          "description": "Tracks requests to the factory service with status and duration. Useful for monitoring external service performance and reliability.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "loki",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "grafanacloud-logs"
+                      },
+                      "spec": {
+                        "direction": "backward",
+                        "editorMode": "code",
+                        "expr": "{component=\"jwt-pizza-service\", type=\"factory-request\"}\r\n| json\r\n| line_format \"Factory → {{.statusCode}} ({{.durationMs}}ms) success={{.success}}\"",
+                        "queryType": "range"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [
+                {
+                  "kind": "organize",
+                  "spec": {
+                    "id": "organize",
+                    "options": {
+                      "includeByName": {
+                        "Line": true,
+                        "Time": true,
+                        "level": true,
+                        "method": true,
+                        "path": true,
+                        "statusCode": true,
+                        "type": true
+                      },
+                      "indexByName": {
+                        "Time": 0,
+                        "level": 1,
+                        "message": 6,
+                        "method": 3,
+                        "path": 4,
+                        "statusCode": 5,
+                        "type": 2
+                      },
+                      "renameByName": {
+                        "Line": "message"
+                      }
+                    }
+                  }
+                }
+              ],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "logs",
+            "version": "13.0.0-23429090056.patch4",
+            "spec": {
+              "options": {
+                "dedupStrategy": "none",
+                "detailsMode": "inline",
+                "enableInfiniteScrolling": false,
+                "enableLogDetails": true,
+                "prettifyLogMessage": true,
+                "showControls": false,
+                "showFieldSelector": false,
+                "showLevel": true,
+                "showLogAttributes": true,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "syntaxHighlighting": true,
+                "timestampResolution": "ms",
+                "unwrappedColumns": false,
+                "wrapLogMessage": true
+              },
+              "fieldConfig": {
+                "defaults": {},
                 "overrides": []
               }
             }
@@ -1566,8 +1313,8 @@
         "kind": "Panel",
         "spec": {
           "id": 6,
-          "title": "Active users",
-          "description": "",
+          "title": "Active Users",
+          "description": "Current number of active users interacting with the system.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1602,7 +1349,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "gauge",
-            "version": "13.0.0-23429090056.patch1",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
                 "barShape": "flat",
@@ -1632,6 +1379,8 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "min": 0,
+                  "max": 50,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -1640,7 +1389,11 @@
                         "color": "green"
                       },
                       {
-                        "value": 80,
+                        "value": 20,
+                        "color": "#EAB839"
+                      },
+                      {
+                        "value": 40,
                         "color": "red"
                       }
                     ]
@@ -1659,8 +1412,8 @@
         "kind": "Panel",
         "spec": {
           "id": 7,
-          "title": "HTTP Requests Total",
-          "description": "",
+          "title": "HTTP Request Rate",
+          "description": "Shows the total HTTP request rate (requests/sec) across all endpoints using a Prometheus rate function.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1695,7 +1448,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.0-23429090056.patch1",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
                 "annotations": {
@@ -1736,12 +1489,12 @@
                     "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
-                    "axisLabel": "",
+                    "axisLabel": "Requests/sec",
                     "axisPlacement": "auto",
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
-                    "fillOpacity": 25,
+                    "fillOpacity": 20,
                     "gradientMode": "none",
                     "hideFrom": {
                       "legend": false,
@@ -1750,7 +1503,7 @@
                     },
                     "insertNulls": false,
                     "lineInterpolation": "linear",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "pointSize": 5,
                     "scaleDistribution": {
                       "type": "linear"
@@ -1777,8 +1530,8 @@
         "kind": "Panel",
         "spec": {
           "id": 8,
-          "title": "Requests by Method (GET vs POST)",
-          "description": "",
+          "title": "HTTP Requests by Method",
+          "description": "Breaks down HTTP request rate by method (GET, POST, PUT, DELETE) to show how different request types contribute to overall traffic.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1796,7 +1549,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (method) (rate(http_requests_by_method_total[1m]))",
+                        "expr": "sum by (method) (rate(http_requests_by_method_total{method=~\"GET|POST|PUT|DELETE\"}[1m]))",
                         "legendFormat": "__auto",
                         "range": true
                       }
@@ -1813,7 +1566,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.0.0-23429090056.patch1",
+            "version": "13.0.0-23429090056.patch4",
             "spec": {
               "options": {
                 "annotations": {
@@ -1834,6 +1587,7 @@
               },
               "fieldConfig": {
                 "defaults": {
+                  "unit": "req/s",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -1859,7 +1613,7 @@
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
                     "drawStyle": "line",
-                    "fillOpacity": 0,
+                    "fillOpacity": 20,
                     "gradientMode": "none",
                     "hideFrom": {
                       "legend": false,
@@ -1868,7 +1622,7 @@
                     },
                     "insertNulls": false,
                     "lineInterpolation": "linear",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "pointSize": 5,
                     "scaleDistribution": {
                       "type": "linear"
@@ -1890,130 +1644,19 @@
             }
           }
         }
-      },
-      "panel-9": {
-        "kind": "Panel",
-        "spec": {
-          "id": 9,
-          "title": "Success vs Failure Rate",
-          "description": "",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "grafanacloud-prom"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum by (result) (rate(http_requests_total[1m]))",
-                        "legendFormat": "__auto",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "gauge",
-            "version": "13.0.0-23429090056.patch1",
-            "spec": {
-              "options": {
-                "barShape": "flat",
-                "barWidthFactor": 0.3,
-                "effects": {
-                  "barGlow": false,
-                  "centerGlow": false,
-                  "gradient": true
-                },
-                "endpointMarker": "point",
-                "minVizHeight": 75,
-                "minVizWidth": 75,
-                "orientation": "auto",
-                "reduceOptions": {
-                  "calcs": ["lastNotNull"],
-                  "fields": "",
-                  "values": false
-                },
-                "segmentCount": 1,
-                "segmentSpacing": 0.3,
-                "shape": "gauge",
-                "showThresholdLabels": false,
-                "showThresholdMarkers": false,
-                "sizing": "auto",
-                "sparkline": true,
-                "textMode": "auto"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": 0,
-                        "color": "green"
-                      },
-                      {
-                        "value": 80,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "palette-classic"
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
       }
     },
     "layout": {
-      "kind": "AutoGridLayout",
+      "kind": "GridLayout",
       "spec": {
-        "maxColumnCount": 3,
-        "columnWidthMode": "standard",
-        "rowHeightMode": "standard",
-        "fillScreen": true,
         "items": [
           {
-            "kind": "AutoGridLayoutItem",
+            "kind": "GridLayoutItem",
             "spec": {
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-17"
-              }
-            }
-          },
-          {
-            "kind": "AutoGridLayoutItem",
-            "spec": {
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-19"
-              }
-            }
-          },
-          {
-            "kind": "AutoGridLayoutItem",
-            "spec": {
+              "x": 4,
+              "y": 0,
+              "width": 8,
+              "height": 10,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-7"
@@ -2021,8 +1664,12 @@
             }
           },
           {
-            "kind": "AutoGridLayoutItem",
+            "kind": "GridLayoutItem",
             "spec": {
+              "x": 12,
+              "y": 0,
+              "width": 8,
+              "height": 10,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-8"
@@ -2030,26 +1677,12 @@
             }
           },
           {
-            "kind": "AutoGridLayoutItem",
+            "kind": "GridLayoutItem",
             "spec": {
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-5"
-              }
-            }
-          },
-          {
-            "kind": "AutoGridLayoutItem",
-            "spec": {
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-4"
-              }
-            }
-          },
-          {
-            "kind": "AutoGridLayoutItem",
-            "spec": {
+              "x": 4,
+              "y": 10,
+              "width": 8,
+              "height": 10,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-6"
@@ -2057,17 +1690,25 @@
             }
           },
           {
-            "kind": "AutoGridLayoutItem",
+            "kind": "GridLayoutItem",
             "spec": {
+              "x": 12,
+              "y": 10,
+              "width": 8,
+              "height": 10,
               "element": {
                 "kind": "ElementReference",
-                "name": "panel-9"
+                "name": "panel-22"
               }
             }
           },
           {
-            "kind": "AutoGridLayoutItem",
+            "kind": "GridLayoutItem",
             "spec": {
+              "x": 4,
+              "y": 20,
+              "width": 8,
+              "height": 10,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-11"
@@ -2075,8 +1716,25 @@
             }
           },
           {
-            "kind": "AutoGridLayoutItem",
+            "kind": "GridLayoutItem",
             "spec": {
+              "x": 12,
+              "y": 20,
+              "width": 8,
+              "height": 10,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-23"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 30,
+              "width": 8,
+              "height": 10,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-13"
@@ -2084,44 +1742,12 @@
             }
           },
           {
-            "kind": "AutoGridLayoutItem",
+            "kind": "GridLayoutItem",
             "spec": {
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-10"
-              }
-            }
-          },
-          {
-            "kind": "AutoGridLayoutItem",
-            "spec": {
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-15"
-              }
-            }
-          },
-          {
-            "kind": "AutoGridLayoutItem",
-            "spec": {
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-12"
-              }
-            }
-          },
-          {
-            "kind": "AutoGridLayoutItem",
-            "spec": {
-              "element": {
-                "kind": "ElementReference",
-                "name": "panel-16"
-              }
-            }
-          },
-          {
-            "kind": "AutoGridLayoutItem",
-            "spec": {
+              "x": 8,
+              "y": 30,
+              "width": 8,
+              "height": 10,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-14"
@@ -2129,17 +1755,51 @@
             }
           },
           {
-            "kind": "AutoGridLayoutItem",
+            "kind": "GridLayoutItem",
             "spec": {
+              "x": 16,
+              "y": 30,
+              "width": 8,
+              "height": 10,
               "element": {
                 "kind": "ElementReference",
-                "name": "panel-18"
+                "name": "panel-15"
               }
             }
           },
           {
-            "kind": "AutoGridLayoutItem",
+            "kind": "GridLayoutItem",
             "spec": {
+              "x": 4,
+              "y": 40,
+              "width": 8,
+              "height": 10,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-10"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 40,
+              "width": 8,
+              "height": 10,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-16"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 4,
+              "y": 50,
+              "width": 8,
+              "height": 10,
               "element": {
                 "kind": "ElementReference",
                 "name": "panel-20"
@@ -2147,11 +1807,41 @@
             }
           },
           {
-            "kind": "AutoGridLayoutItem",
+            "kind": "GridLayoutItem",
             "spec": {
+              "x": 12,
+              "y": 50,
+              "width": 8,
+              "height": 10,
               "element": {
                 "kind": "ElementReference",
-                "name": "panel-21"
+                "name": "panel-24"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 4,
+              "y": 60,
+              "width": 8,
+              "height": 10,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-28"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 60,
+              "width": 8,
+              "height": 10,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-27"
               }
             }
           }
@@ -2183,6 +1873,22 @@
       "fiscalYearStartMonth": 0
     },
     "title": "Pizza Dashboard",
-    "variables": []
+    "variables": [
+      {
+        "kind": "ConstantVariable",
+        "spec": {
+          "name": "component",
+          "query": "jwt-pizza-service",
+          "current": {
+            "text": "jwt-pizza-service",
+            "value": "jwt-pizza-service"
+          },
+          "label": "Component",
+          "hide": "hideVariable",
+          "skipUrlSync": true,
+          "description": "constant template variable for the log component"
+        }
+      }
+    ]
   }
 }
