@@ -63,8 +63,8 @@ jobs:
       - name: Tests
         run: npm test
 
-      - name: Generate coverage badges
-        run: npm run coverage:badges
+      #- name: Generate coverage badges
+      #run: npm run coverage:badges
 
       - name: Commit coverage badge
         run: |
@@ -137,7 +137,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: 'jwt-pizza-service'
+          ECR_REPOSITORY: "jwt-pizza-service"
         run: |
           docker buildx build --platform=linux/arm64 \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
