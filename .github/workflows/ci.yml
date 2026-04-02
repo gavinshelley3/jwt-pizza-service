@@ -63,8 +63,8 @@ jobs:
       - name: Tests
         run: npm test
 
-      - name: Generate coverage badges
-        run: npm run coverage:badges
+      #- name: Generate coverage badges
+      #run: npm run coverage:badges
 
       - name: Verify coverage badges exist
         run: |
