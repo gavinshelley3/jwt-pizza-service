@@ -7,7 +7,7 @@
     "start": "cd src && node index.js",
     "test": "jest",
     "lint": "eslint .",
-    "coverage:badges": "generateBadges -c coverage/coverage-summary.json -o badges"
+    "coverage:badges": "node scripts/generateCoverageBadges.js"
   },
   "license": "MIT",
   "dependencies": {
