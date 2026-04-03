@@ -273,4 +273,8 @@ class LokiLogger {
   }
 }
 
-module.exports = new LokiLogger(config.logging);
+const loggerInstance = new LokiLogger(config.logging);
+
+module.exports = loggerInstance;
+module.exports.LokiLogger = LokiLogger;
+
