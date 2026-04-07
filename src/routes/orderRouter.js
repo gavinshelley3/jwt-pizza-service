@@ -7,6 +7,21 @@ const metrics = require('../metrics.js');
 const logger = require('../logger.js');
 
 const orderRouter = express.Router();
+let chaosEnabled = false;
+
+const parseChaosState = (stateParam) => {
+  if (typeof stateParam !== 'string') {
+    throw new StatusCodeError('invalid chaos state', 400);
+  }
+  const normalized = stateParam.toLowerCase();
+  if (normalized === 'true') {
+    return true;
+  }
+  if (normalized === 'false') {
+    return false;
+  }
+  throw new StatusCodeError('invalid chaos state', 400);
+};
 
 const parseJsonOrText = (text) => {
   try {
@@ -15,11 +30,6 @@ const parseJsonOrText = (text) => {
     return text;
   }
 };
-
-orderRouter.use((req, res, next) => {
-  console.log('[route] order router hit', req.method, req.originalUrl || req.path);
-  next();
-});
 
 orderRouter.docs = [
   {
@@ -53,6 +63,14 @@ orderRouter.docs = [
     example: `curl -X POST localhost:3000/api/order -H 'Content-Type: application/json' -d '{"franchiseId": 1, "storeId":1, "items":[{ "menuId": 1, "description": "Veggie", "price": 0.05 }]}'  -H 'Authorization: Bearer tttttt'`,
     response: { order: { franchiseId: 1, storeId: 1, items: [{ menuId: 1, description: 'Veggie', price: 0.05 }], id: 1 }, jwt: '1111111111' },
   },
+  {
+    method: 'PUT',
+    path: '/api/order/chaos/:state',
+    requiresAuth: true,
+    description: 'Toggle chaos mode for orders (admin only)',
+    example: `curl -X PUT localhost:3000/api/order/chaos/true -H 'Authorization: Bearer admin-token'`,
+    response: { chaos: true },
+  },
 ];
 
 // getMenu
@@ -75,6 +93,19 @@ orderRouter.put(
     const addMenuItemReq = req.body;
     await DB.addMenuItem(addMenuItemReq);
     res.send(await DB.getMenu());
+  })
+);
+
+orderRouter.put(
+  '/chaos/:state',
+  authRouter.authenticateToken,
+  asyncHandler(async (req, res) => {
+    if (!req.user.isRole(Role.Admin)) {
+      throw new StatusCodeError('unable to toggle chaos', 403);
+    }
+    const nextState = parseChaosState(req.params.state);
+    chaosEnabled = nextState;
+    res.json({ chaos: chaosEnabled });
   })
 );
 
@@ -102,6 +133,18 @@ orderRouter.post(
     const totalPrice = Array.isArray(order.items)
       ? order.items.reduce((sum, item) => sum + (Number(item.price) || 0), 0)
       : 0;
+
+    if (chaosEnabled && Math.random() < 0.5) {
+      metrics.pizzaPurchase({ success: false, latencyMs: 0, pizzas: pizzasOrdered, revenue: 0 });
+      logger.log('warn', 'order-chaos', {
+        message: 'Chaos monkey',
+        dinerId: req.user.id,
+        franchiseId: order.franchiseId,
+        storeId: order.storeId,
+      });
+      throw new StatusCodeError('Chaos monkey', 500);
+    }
+
     const startedAt = process.hrtime.bigint();
     let response;
     try {
@@ -159,5 +202,11 @@ orderRouter.post(
     }
   })
 );
+
+orderRouter.setChaosState = (state) => {
+  chaosEnabled = Boolean(state);
+};
+
+orderRouter.isChaosEnabled = () => chaosEnabled;
 
 module.exports = orderRouter;

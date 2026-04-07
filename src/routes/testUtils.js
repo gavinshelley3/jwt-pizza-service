@@ -36,6 +36,7 @@ global.fetch = jest.fn();
 
 const { Role } = require("../database/database.js");
 const app = require("../service");
+const orderRouter = require("./orderRouter.js");
 
 const baseUser = (overrides = {}) => ({
   id: 10,
@@ -55,6 +56,7 @@ const resetMocks = () => {
   jest.clearAllMocks();
   mockDb.isLoggedIn.mockResolvedValue(false);
   global.fetch.mockReset();
+  orderRouter.setChaosState?.(false);
 };
 
 module.exports = { app, mockDb, Role, baseUser, authHeader, resetMocks };

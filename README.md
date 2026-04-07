@@ -58,3 +58,25 @@ Nodemon is assumed to be installed globally so that you can have hot reloading w
 ```sh
 npm -g install nodemon
 ```
+
+## Chaos Testing
+
+### Toggle the chaos flag
+- `PUT /api/order/chaos/true` with an admin JWT enables chaos and returns `{ "chaos": true }`.
+- `PUT /api/order/chaos/false` with an admin JWT disables chaos and returns `{ "chaos": false }`.
+- Requests use the same JWT header as other admin-protected endpoints: `curl -X PUT localhost:3000/api/order/chaos/true -H 'Authorization: Bearer <admin token>'`.
+
+### Local / remote testing
+1. Start the service (`npm start`) or deploy as usual.
+2. Enable chaos via the endpoint above.
+3. Issue `POST /api/order` requests as a diner; roughly half should return `500` with the message `Chaos monkey`.
+4. Disable chaos when finished to restore normal behavior.
+5. For deterministic verification (e.g., CI), run `npm test -- src/routes/orderRouter.test.js`, which mocks randomness to exercise both chaos success and failure paths.
+
+### Observability signals
+- HTTP request logs: `logger.httpLogger` records each request with `type="http-req"`, capturing `method`, `path`, `statusCode`, and `durationMs`. (Inferred Loki alert: `sum(rate({component="jwt-pizza-service",type="http-req",method="POST",path="/api/order",statusCode="500"}[5m])) > 0`.)
+- Factory / chaos logs: `logger.logFactoryRequest` emits `type="factory-request"` entries with `success` and `statusCode`, and chaos failures log `type="order-chaos"` with the `Chaos monkey` message. (Inferred Loki alert: `count_over_time({component="jwt-pizza-service",type=~"order-chaos|factory-request",success="false"}[5m]) > 0`.)
+- Metrics: `metrics.pizzaPurchase` increments `pizza_creation_failures_total` for factory or chaos failures and `pizza_creation_latency_ms` for successful runs. (Inferred Grafana alert: `increase(pizza_creation_failures_total{service.name="jwt-pizza-service"}[5m]) > 0`.)
+
+During chaos drills, watch the alerts above plus any dashboards that graph `pizza_creation_failures_total`, HTTP 500 counts for `POST /api/order`, and Loki searches for `Chaos monkey` or `type="factory-request" success=false`.
+

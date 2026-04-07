@@ -100,4 +100,119 @@ describe("order endpoints", () => {
     expect(res.status).toBe(500);
     expect(res.body.followLinkToEndChaos).toBe("http://fail");
   });
+  test("allows admins to enable chaos", async () => {
+    const admin = baseUser({ roles: [{ role: Role.Admin }] });
+    const header = authHeader(admin);
+
+    const res = await request(app).put("/api/order/chaos/true").set("Authorization", header);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ chaos: true });
+  });
+
+  test("allows admins to disable chaos", async () => {
+    const admin = baseUser({ roles: [{ role: Role.Admin }] });
+    const header = authHeader(admin);
+    await request(app).put("/api/order/chaos/true").set("Authorization", header);
+
+    const res = await request(app).put("/api/order/chaos/false").set("Authorization", header);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ chaos: false });
+  });
+
+  test("rejects invalid chaos state", async () => {
+    const admin = baseUser({ roles: [{ role: Role.Admin }] });
+    const header = authHeader(admin);
+
+    const res = await request(app).put("/api/order/chaos/not-real").set("Authorization", header);
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe("invalid chaos state");
+  });
+
+  test("requires auth for chaos toggle", async () => {
+    const res = await request(app).put("/api/order/chaos/true");
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe("unauthorized");
+  });
+
+  test("prevents non-admins from toggling chaos", async () => {
+    const diner = baseUser({ roles: [{ role: Role.Diner }] });
+    const header = authHeader(diner);
+
+    const res = await request(app).put("/api/order/chaos/true").set("Authorization", header);
+
+    expect(res.status).toBe(403);
+    expect(res.body.message).toBe("unable to toggle chaos");
+  });
+
+  test("creates an order when chaos is disabled", async () => {
+    const diner = baseUser({ id: 61 });
+    const header = authHeader(diner);
+    mockDb.addDinerOrder.mockResolvedValue({ id: 11, items: [] });
+    global.fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ reportUrl: "http://steady", jwt: "jwt-ok" }),
+    });
+
+    const res = await request(app)
+      .post("/api/order")
+      .set("Authorization", header)
+      .send({ franchiseId: 3, storeId: 4, items: [] });
+
+    expect(res.status).toBe(200);
+    expect(res.body.followLinkToEndChaos).toBe("http://steady");
+    expect(global.fetch).toHaveBeenCalled();
+  });
+
+  test("fails an order when chaos is enabled and randomness triggers failure", async () => {
+    const admin = baseUser({ roles: [{ role: Role.Admin }] });
+    const adminHeader = authHeader(admin);
+    await request(app).put("/api/order/chaos/true").set("Authorization", adminHeader);
+
+    const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0.1);
+    const diner = baseUser({ id: 71 });
+    const dinerHeader = authHeader(diner);
+    mockDb.addDinerOrder.mockResolvedValue({ id: 12, items: [] });
+
+    const res = await request(app)
+      .post("/api/order")
+      .set("Authorization", dinerHeader)
+      .send({ franchiseId: 5, storeId: 6, items: [] });
+
+    expect(res.status).toBe(500);
+    expect(res.body.message).toBe("Chaos monkey");
+    expect(global.fetch).not.toHaveBeenCalled();
+    randomSpy.mockRestore();
+  });
+
+  test("allows orders when chaos is enabled but randomness passes", async () => {
+    const admin = baseUser({ roles: [{ role: Role.Admin }] });
+    const adminHeader = authHeader(admin);
+    await request(app).put("/api/order/chaos/true").set("Authorization", adminHeader);
+
+    const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0.9);
+    const diner = baseUser({ id: 81 });
+    const dinerHeader = authHeader(diner);
+    mockDb.addDinerOrder.mockResolvedValue({ id: 13, items: [] });
+    global.fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ reportUrl: "http://chaos-ok", jwt: "chaos-jwt" }),
+    });
+
+    const res = await request(app)
+      .post("/api/order")
+      .set("Authorization", dinerHeader)
+      .send({ franchiseId: 7, storeId: 8, items: [] });
+
+    expect(res.status).toBe(200);
+    expect(res.body.followLinkToEndChaos).toBe("http://chaos-ok");
+    expect(global.fetch).toHaveBeenCalled();
+    randomSpy.mockRestore();
+  });
+
 });
