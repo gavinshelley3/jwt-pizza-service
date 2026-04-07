@@ -33,6 +33,16 @@ jest.mock("jsonwebtoken", () => ({
 const jwt = require("jsonwebtoken");
 
 global.fetch = jest.fn();
+const defaultFetchResponse = () => ({
+  ok: true,
+  status: 200,
+  statusText: "OK",
+  text: async () => "",
+});
+const applyDefaultFetch = () => {
+  global.fetch.mockImplementation(() => Promise.resolve(defaultFetchResponse()));
+};
+applyDefaultFetch();
 
 const { Role } = require("../database/database.js");
 const app = require("../service");
@@ -56,6 +66,7 @@ const resetMocks = () => {
   jest.clearAllMocks();
   mockDb.isLoggedIn.mockResolvedValue(false);
   global.fetch.mockReset();
+  applyDefaultFetch();
   orderRouter.setChaosState?.(false);
 };
 

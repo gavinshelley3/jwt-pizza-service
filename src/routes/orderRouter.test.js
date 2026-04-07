@@ -1,6 +1,11 @@
 const request = require("supertest");
 const { app, mockDb, Role, authHeader, baseUser, resetMocks } = require("./testUtils");
 
+const config = require("../config.js");
+const factoryOrderUrl = `${config.factory.url}/api/order`;
+const getFactoryFetchCalls = () =>
+  global.fetch.mock.calls.filter(([url]) => url === factoryOrderUrl);
+
 beforeEach(resetMocks);
 
 describe("order endpoints", () => {
@@ -79,7 +84,7 @@ describe("order endpoints", () => {
     expect(res.body.order).toMatchObject({ id: 5 });
     expect(res.body.followLinkToEndChaos).toBe("http://report");
     expect(res.body.jwt).toBe("factory-jwt");
-    expect(global.fetch).toHaveBeenCalled();
+    expect(getFactoryFetchCalls()).toHaveLength(1);
   });
 
   test("returns 500 when factory rejects order", async () => {
@@ -165,7 +170,7 @@ describe("order endpoints", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.followLinkToEndChaos).toBe("http://steady");
-    expect(global.fetch).toHaveBeenCalled();
+    expect(getFactoryFetchCalls()).toHaveLength(1);
   });
 
   test("fails an order when chaos is enabled and randomness triggers failure", async () => {
@@ -185,7 +190,7 @@ describe("order endpoints", () => {
 
     expect(res.status).toBe(500);
     expect(res.body.message).toBe("Chaos monkey");
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(getFactoryFetchCalls()).toHaveLength(0);
     randomSpy.mockRestore();
   });
 
@@ -211,7 +216,7 @@ describe("order endpoints", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.followLinkToEndChaos).toBe("http://chaos-ok");
-    expect(global.fetch).toHaveBeenCalled();
+    expect(getFactoryFetchCalls()).toHaveLength(1);
     randomSpy.mockRestore();
   });
 
