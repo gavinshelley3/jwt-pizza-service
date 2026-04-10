@@ -32,7 +32,14 @@ apiRouter.use("/user", userRouter);
 apiRouter.use("/order", orderRouter);
 apiRouter.use("/franchise", franchiseRouter);
 
-apiRouter.use("/docs", (req, res) => {
+const requireAuthInProduction = (req, res, next) => {
+  if (process.env.NODE_ENV === "production") {
+    return authRouter.authenticateToken(req, res, next);
+  }
+  return next();
+};
+
+const sendDocs = (req, res) => {
   res.json({
     version: version.version,
     endpoints: [
@@ -43,7 +50,10 @@ apiRouter.use("/docs", (req, res) => {
     ],
     config: { factory: config.factory.url, db: config.db.connection.host },
   });
-});
+};
+
+apiRouter.get("/docs", requireAuthInProduction, sendDocs);
+app.get("/docs", requireAuthInProduction, sendDocs);
 
 app.get("/", (req, res) => {
   res.json({
@@ -51,6 +61,12 @@ app.get("/", (req, res) => {
     version: version.version,
   });
 });
+
+const sendVersion = (req, res) => {
+  res.json({ version: version.version });
+};
+
+app.get("/version.json", requireAuthInProduction, sendVersion);
 
 app.use("*", (req, res) => {
   res.status(404).json({

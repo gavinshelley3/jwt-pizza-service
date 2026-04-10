@@ -20,6 +20,43 @@ describe("service shell endpoints", () => {
     expect(res.body.config).toHaveProperty("db");
   });
 
+  test("requires auth for docs in production", async () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      const res = await request(app).get("/api/docs");
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe("unauthorized");
+    } finally {
+      process.env.NODE_ENV = originalEnv;
+    }
+  });
+
+  test("allows authenticated docs access in production", async () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      const header = authHeader(baseUser());
+      const res = await request(app).get("/api/docs").set("Authorization", header);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.endpoints)).toBe(true);
+    } finally {
+      process.env.NODE_ENV = originalEnv;
+    }
+  });
+
+  test("requires auth for version metadata in production", async () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      const res = await request(app).get("/version.json");
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe("unauthorized");
+    } finally {
+      process.env.NODE_ENV = originalEnv;
+    }
+  });
+
   test("returns 404 for unknown endpoints", async () => {
     const res = await request(app).get("/no/such/path");
     expect(res.status).toBe(404);
