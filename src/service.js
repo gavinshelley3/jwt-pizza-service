@@ -77,13 +77,16 @@ app.use("*", (req, res) => {
 // Default error handler for all exceptions and errors.
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
+  const isBodyParseError = err instanceof SyntaxError && err.type === 'entity.parse.failed';
+  const statusCode = err.statusCode ?? err.status ?? (isBodyParseError ? 400 : 500);
+  const message = isBodyParseError ? 'invalid JSON payload' : err.message || 'internal server error';
   logger.logException(err, {
     path: req.originalUrl || req.url,
     method: req.method,
-    statusCode: err.statusCode ?? 500,
+    statusCode,
     userId: req.user?.id,
   });
-  res.status(err.statusCode ?? 500).json({ message: err.message, stack: err.stack });
+  res.status(statusCode).json({ message });
 });
 
 module.exports = app;

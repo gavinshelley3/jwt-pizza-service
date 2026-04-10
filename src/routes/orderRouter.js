@@ -31,6 +31,48 @@ const parseJsonOrText = (text) => {
   }
 };
 
+const toPositiveInteger = (value, fieldName) => {
+  const num = Number(value);
+  if (!Number.isInteger(num) || num <= 0) {
+    throw new StatusCodeError(`invalid ${fieldName}`, 400);
+  }
+  return num;
+};
+
+const buildTrustedOrderRequest = async (orderReq = {}) => {
+  if (!orderReq || typeof orderReq !== 'object' || Array.isArray(orderReq)) {
+    throw new StatusCodeError('invalid order payload', 400);
+  }
+  const franchiseId = toPositiveInteger(orderReq.franchiseId, 'franchiseId');
+  const storeId = toPositiveInteger(orderReq.storeId, 'storeId');
+  if (!Array.isArray(orderReq.items) || orderReq.items.length === 0) {
+    throw new StatusCodeError('items must be a non-empty array', 400);
+  }
+  const menuIds = orderReq.items.map((item, index) => {
+    if (!item || typeof item !== 'object') {
+      throw new StatusCodeError(`invalid item at index ${index}`, 400);
+    }
+    return toPositiveInteger(item.menuId, 'menuId');
+  });
+  const uniqueMenuIds = [...new Set(menuIds)];
+  const menuItems = await DB.getMenuItemsByIds(uniqueMenuIds);
+  const menuMap = new Map(menuItems.map((menuItem) => [menuItem.id, menuItem]));
+
+  const sanitizedItems = menuIds.map((menuId) => {
+    const menuItem = menuMap.get(menuId);
+    if (!menuItem) {
+      throw new StatusCodeError('invalid menu item', 400);
+    }
+    const price = Number(menuItem.price);
+    if (!Number.isFinite(price) || price < 0) {
+      throw new StatusCodeError('invalid menu item price', 500);
+    }
+    return { menuId, description: menuItem.title, price };
+  });
+
+  return { ...orderReq, franchiseId, storeId, items: sanitizedItems };
+};
+
 orderRouter.docs = [
   {
     method: 'GET',
@@ -123,8 +165,8 @@ orderRouter.post(
   '/',
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
-    const orderReq = req.body;
-    const order = await DB.addDinerOrder(req.user, orderReq);
+    const trustedOrderReq = await buildTrustedOrderRequest(req.body);
+    const order = await DB.addDinerOrder(req.user, trustedOrderReq);
     const factoryPayload = {
       diner: { id: req.user.id, name: req.user.name, email: req.user.email },
       order,

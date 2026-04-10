@@ -9,6 +9,7 @@ const mockDb = {
   isLoggedIn: jest.fn(),
   logoutUser: jest.fn(),
   getMenu: jest.fn(),
+  getMenuItemsByIds: jest.fn(),
   addMenuItem: jest.fn(),
   getOrders: jest.fn(),
   addDinerOrder: jest.fn(),
@@ -66,6 +67,7 @@ const authHeader = (user = baseUser()) => {
 const resetMocks = () => {
   jest.clearAllMocks();
   mockDb.isLoggedIn.mockResolvedValue(false);
+  mockDb.getMenuItemsByIds.mockResolvedValue([{ id: 1, title: "Veggie", price: 0.05 }]);
   global.fetch.mockReset();
   applyDefaultFetch();
   orderRouter.setChaosState?.(false);

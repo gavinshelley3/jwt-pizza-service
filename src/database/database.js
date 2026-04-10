@@ -214,11 +214,35 @@ class DB {
     try {
       const orderResult = await this.query(connection, `INSERT INTO dinerOrder (dinerId, franchiseId, storeId, date) VALUES (?, ?, ?, now())`, [user.id, order.franchiseId, order.storeId]);
       const orderId = orderResult.insertId;
-      for (const item of order.items) {
-        const menuId = await this.getID(connection, 'id', item.menuId, 'menu');
-        await this.query(connection, `INSERT INTO orderItem (orderId, menuId, description, price) VALUES (?, ?, ?, ?)`, [orderId, menuId, item.description, item.price]);
+      const sanitizedItems = [];
+      for (const item of order.items || []) {
+        const menuRows = await this.query(connection, `SELECT id, title, price FROM menu WHERE id=?`, [item.menuId]);
+        const menuItem = menuRows[0];
+        if (!menuItem) {
+          throw new StatusCodeError('invalid menu item', 400);
+        }
+        const price = Number(menuItem.price);
+        if (!Number.isFinite(price) || price < 0) {
+          throw new StatusCodeError('invalid menu price', 500);
+        }
+        await this.query(connection, `INSERT INTO orderItem (orderId, menuId, description, price) VALUES (?, ?, ?, ?)`, [orderId, menuItem.id, menuItem.title, price]);
+        sanitizedItems.push({ menuId: menuItem.id, description: menuItem.title, price });
       }
-      return { ...order, id: orderId };
+      return { ...order, items: sanitizedItems, id: orderId };
+    } finally {
+      connection.end();
+    }
+  }
+
+  async getMenuItemsByIds(menuIds = []) {
+    if (!Array.isArray(menuIds) || menuIds.length === 0) {
+      return [];
+    }
+    const connection = await this.getConnection();
+    try {
+      const placeholders = menuIds.map(() => '?').join(', ');
+      const rows = await this.query(connection, `SELECT id, title, price FROM menu WHERE id IN (${placeholders})`, menuIds);
+      return rows;
     } finally {
       connection.end();
     }

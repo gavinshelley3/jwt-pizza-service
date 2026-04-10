@@ -68,7 +68,8 @@ describe("order endpoints", () => {
   test("creates an order and forwards to factory", async () => {
     const diner = baseUser({ id: 31 });
     const header = authHeader(diner);
-    mockDb.addDinerOrder.mockResolvedValue({ id: 5, items: [] });
+    mockDb.getMenuItemsByIds.mockResolvedValue([{ id: 1, title: "Veggie", price: 9.99 }]);
+    mockDb.addDinerOrder.mockResolvedValue({ id: 5, items: [{ menuId: 1, description: "Veggie", price: 9.99 }] });
     global.fetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -78,19 +79,109 @@ describe("order endpoints", () => {
     const res = await request(app)
       .post("/api/order")
       .set("Authorization", header)
-      .send({ franchiseId: 1, storeId: 1, items: [{ menuId: 1, description: "Veggie", price: 0.05 }] });
+      .send({ franchiseId: 1, storeId: 1, items: [{ menuId: 1, description: "Tamper", price: -1000 }] });
 
     expect(res.status).toBe(200);
     expect(res.body.order).toMatchObject({ id: 5 });
     expect(res.body.followLinkToEndChaos).toBe("http://report");
     expect(res.body.jwt).toBe("factory-jwt");
     expect(getFactoryFetchCalls()).toHaveLength(1);
+    expect(mockDb.addDinerOrder).toHaveBeenCalledWith(
+      diner,
+      expect.objectContaining({ items: [{ menuId: 1, description: "Veggie", price: 9.99 }] })
+    );
+  });
+
+  test("rejects order payloads missing items", async () => {
+    const diner = baseUser({ id: 35 });
+    const header = authHeader(diner);
+
+    const res = await request(app).post("/api/order").set("Authorization", header).send({ franchiseId: 1, storeId: 2 });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/items/i);
+    expect(mockDb.addDinerOrder).not.toHaveBeenCalled();
+  });
+
+  test("rejects orders when items is not an array", async () => {
+    const diner = baseUser({ id: 36 });
+    const header = authHeader(diner);
+
+    const res = await request(app)
+      .post("/api/order")
+      .set("Authorization", header)
+      .send({ franchiseId: 1, storeId: 2, items: "not-array" });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/items/i);
+  });
+
+  test("rejects orders with missing menuId", async () => {
+    const diner = baseUser({ id: 37 });
+    const header = authHeader(diner);
+
+    const res = await request(app)
+      .post("/api/order")
+      .set("Authorization", header)
+      .send({ franchiseId: 1, storeId: 2, items: [{}] });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/menuId/i);
+  });
+
+  test("rejects orders referencing unknown menu items", async () => {
+    const diner = baseUser({ id: 38 });
+    const header = authHeader(diner);
+    mockDb.getMenuItemsByIds.mockResolvedValue([]);
+
+    const res = await request(app)
+      .post("/api/order")
+      .set("Authorization", header)
+      .send({ franchiseId: 1, storeId: 2, items: [{ menuId: 999 }] });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/menu item/i);
+  });
+
+  test("ignores client-supplied prices and uses trusted menu pricing", async () => {
+    const diner = baseUser({ id: 39 });
+    const header = authHeader(diner);
+    mockDb.getMenuItemsByIds.mockResolvedValue([
+      { id: 2, title: "Margherita", price: 15.25 },
+      { id: 3, title: "Pepperoni", price: 18.75 },
+    ]);
+    mockDb.addDinerOrder.mockResolvedValue({
+      id: 55,
+      items: [
+        { menuId: 2, description: "Margherita", price: 15.25 },
+        { menuId: 3, description: "Pepperoni", price: 18.75 },
+      ],
+    });
+
+    const res = await request(app)
+      .post("/api/order")
+      .set("Authorization", header)
+      .send({
+        franchiseId: 5,
+        storeId: 6,
+        items: [
+          { menuId: 2, description: "Hack1", price: 0 },
+          { menuId: 3, description: "Hack2", price: 99999 },
+        ],
+      });
+
+    expect(res.status).toBe(200);
+    const submittedOrder = mockDb.addDinerOrder.mock.calls[0][1];
+    expect(submittedOrder.items).toEqual([
+      { menuId: 2, description: "Margherita", price: 15.25 },
+      { menuId: 3, description: "Pepperoni", price: 18.75 },
+    ]);
   });
 
   test("returns 500 when factory rejects order", async () => {
     const diner = baseUser({ id: 41 });
     const header = authHeader(diner);
-    mockDb.addDinerOrder.mockResolvedValue({ id: 7, items: [] });
+    mockDb.addDinerOrder.mockResolvedValue({ id: 7, items: [{ menuId: 1, description: "Veggie", price: 0.05 }] });
     global.fetch.mockResolvedValue({
       ok: false,
       status: 500,
@@ -100,7 +191,7 @@ describe("order endpoints", () => {
     const res = await request(app)
       .post("/api/order")
       .set("Authorization", header)
-      .send({ franchiseId: 1, storeId: 2, items: [] });
+      .send({ franchiseId: 1, storeId: 2, items: [{ menuId: 1 }] });
 
     expect(res.status).toBe(500);
     expect(res.body.followLinkToEndChaos).toBe("http://fail");
@@ -156,7 +247,7 @@ describe("order endpoints", () => {
   test("creates an order when chaos is disabled", async () => {
     const diner = baseUser({ id: 61 });
     const header = authHeader(diner);
-    mockDb.addDinerOrder.mockResolvedValue({ id: 11, items: [] });
+    mockDb.addDinerOrder.mockResolvedValue({ id: 11, items: [{ menuId: 1, description: "Veggie", price: 0.05 }] });
     global.fetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -166,7 +257,7 @@ describe("order endpoints", () => {
     const res = await request(app)
       .post("/api/order")
       .set("Authorization", header)
-      .send({ franchiseId: 3, storeId: 4, items: [] });
+      .send({ franchiseId: 3, storeId: 4, items: [{ menuId: 1 }] });
 
     expect(res.status).toBe(200);
     expect(res.body.followLinkToEndChaos).toBe("http://steady");
@@ -181,12 +272,12 @@ describe("order endpoints", () => {
     const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0.1);
     const diner = baseUser({ id: 71 });
     const dinerHeader = authHeader(diner);
-    mockDb.addDinerOrder.mockResolvedValue({ id: 12, items: [] });
+    mockDb.addDinerOrder.mockResolvedValue({ id: 12, items: [{ menuId: 1, description: "Veggie", price: 0.05 }] });
 
     const res = await request(app)
       .post("/api/order")
       .set("Authorization", dinerHeader)
-      .send({ franchiseId: 5, storeId: 6, items: [] });
+      .send({ franchiseId: 5, storeId: 6, items: [{ menuId: 1 }] });
 
     expect(res.status).toBe(500);
     expect(res.body.message).toBe("Chaos monkey");
@@ -202,7 +293,7 @@ describe("order endpoints", () => {
     const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0.9);
     const diner = baseUser({ id: 81 });
     const dinerHeader = authHeader(diner);
-    mockDb.addDinerOrder.mockResolvedValue({ id: 13, items: [] });
+    mockDb.addDinerOrder.mockResolvedValue({ id: 13, items: [{ menuId: 1, description: "Veggie", price: 0.05 }] });
     global.fetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -212,7 +303,7 @@ describe("order endpoints", () => {
     const res = await request(app)
       .post("/api/order")
       .set("Authorization", dinerHeader)
-      .send({ franchiseId: 7, storeId: 8, items: [] });
+      .send({ franchiseId: 7, storeId: 8, items: [{ menuId: 1 }] });
 
     expect(res.status).toBe(200);
     expect(res.body.followLinkToEndChaos).toBe("http://chaos-ok");

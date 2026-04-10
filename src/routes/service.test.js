@@ -63,6 +63,18 @@ describe("service shell endpoints", () => {
     expect(res.body.message).toBe("unknown endpoint");
   });
 
+  test("malformed JSON returns generic error without stack trace", async () => {
+    const header = authHeader(baseUser());
+    const res = await request(app)
+      .post("/api/order")
+      .set("Authorization", header)
+      .set("Content-Type", "application/json")
+      .send('{"franchiseId": 1');
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ message: "invalid JSON payload" });
+  });
+
   test("surfaces router errors with status code", async () => {
     const user = baseUser();
     const header = authHeader(user);
