@@ -28,6 +28,30 @@ describe("franchise endpoints", () => {
     expect(mockDb.getUserFranchises).toHaveBeenCalledWith(4);
   });
 
+  test("rejects access to another user's franchises", async () => {
+    const user = baseUser({ id: 4, roles: [{ role: Role.Diner }] });
+    const header = authHeader(user);
+
+    const res = await request(app).get("/api/franchise/99").set("Authorization", header);
+
+    expect(res.status).toBe(403);
+    expect(res.body.message).toBe("forbidden");
+    expect(mockDb.getUserFranchises).not.toHaveBeenCalled();
+  });
+
+  test("allows admins to view any user's franchises", async () => {
+    const admin = baseUser({ id: 1, roles: [{ role: Role.Admin }] });
+    const header = authHeader(admin);
+    const franchises = [{ id: 10, name: "Global Franchise" }];
+    mockDb.getUserFranchises.mockResolvedValue(franchises);
+
+    const res = await request(app).get("/api/franchise/42").set("Authorization", header);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(franchises);
+    expect(mockDb.getUserFranchises).toHaveBeenCalledWith(42);
+  });
+
   test("blocks franchise creation for non-admins", async () => {
     const user = baseUser({ roles: [{ role: Role.Diner }] });
     const header = authHeader(user);
