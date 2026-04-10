@@ -4,8 +4,100 @@ const config = require('../config.js');
 const { asyncHandler } = require('../endpointHelper.js');
 const { DB, Role } = require('../database/database.js');
 const metrics = require('../metrics.js');
+const logger = require('../logger.js');
 
 const authRouter = express.Router();
+
+const isBlank = (value) => typeof value !== 'string' || value.trim().length === 0;
+const MAX_LOGIN_ATTEMPTS_PER_WINDOW = 5;
+const LOGIN_WINDOW_MS = 60 * 1000;
+const LOCKOUT_MS = 5 * 60 * 1000;
+const BACKOFF_THRESHOLD = 3;
+const BACKOFF_STEP_MS = 200;
+const BACKOFF_MAX_MS = 1000;
+const LOCKED_RESPONSE_DELAY_MS = 500;
+const loginAttempts = new Map();
+
+const sleep = (ms = 0) => (ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms)) : Promise.resolve());
+const normalizeEmail = (value) => (typeof value === 'string' ? value.trim() : '');
+const requestIp = (req) =>
+  req.ip ||
+  req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+  req.headers['x-real-ip'] ||
+  req.connection?.remoteAddress ||
+  req.socket?.remoteAddress ||
+  'unknown';
+const loginKey = (req, email) => `${requestIp(req)}:${(email || 'anonymous').toLowerCase()}`;
+
+function resetLoginLimiter() {
+  loginAttempts.clear();
+}
+
+function getAttemptEntry(key) {
+  const now = Date.now();
+  let entry = loginAttempts.get(key);
+  if (!entry) {
+    entry = { attempts: 0, windowStart: now, lockUntil: 0 };
+    loginAttempts.set(key, entry);
+    return entry;
+  }
+  if (entry.lockUntil && entry.lockUntil <= now) {
+    entry.lockUntil = 0;
+    entry.attempts = 0;
+    entry.windowStart = now;
+  } else if (!entry.lockUntil && now - entry.windowStart > LOGIN_WINDOW_MS) {
+    entry.attempts = 0;
+    entry.windowStart = now;
+  }
+  return entry;
+}
+
+function registerFailure(key) {
+  const now = Date.now();
+  const entry = getAttemptEntry(key);
+  entry.attempts += 1;
+  if (entry.lockUntil && entry.lockUntil > now) {
+    entry.lockUntil = now + LOCKOUT_MS;
+  } else if (entry.attempts >= MAX_LOGIN_ATTEMPTS_PER_WINDOW) {
+    entry.lockUntil = now + LOCKOUT_MS;
+  }
+  const backoffSteps = Math.max(entry.attempts - BACKOFF_THRESHOLD + 1, 0);
+  const delayMs = Math.min(backoffSteps * BACKOFF_STEP_MS, BACKOFF_MAX_MS);
+  return { delayMs, locked: Boolean(entry.lockUntil && entry.lockUntil > now) };
+}
+
+function clearFailures(key) {
+  loginAttempts.delete(key);
+}
+
+function isLocked(key) {
+  const entry = loginAttempts.get(key);
+  if (!entry) {
+    return false;
+  }
+  const now = Date.now();
+  if (entry.lockUntil && entry.lockUntil > now) {
+    return true;
+  }
+  if (entry.lockUntil && entry.lockUntil <= now) {
+    loginAttempts.delete(key);
+  }
+  return false;
+}
+
+function logFailedLogin(req, email, reason, extra = {}) {
+  logger.log('warn', 'auth-login-failed', {
+    reason,
+    email: email || '<missing>',
+    ip: requestIp(req),
+    ...extra,
+  });
+}
+
+const isAuthenticationError = (error) => {
+  const status = error?.statusCode;
+  return status === 401 || status === 404;
+};
 
 authRouter.docs = [
   {
@@ -91,13 +183,40 @@ authRouter.post(
 authRouter.put(
   '/',
   asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
+    const normalizedEmail = normalizeEmail(email);
+    const key = loginKey(req, normalizedEmail);
+
+    if (isLocked(key)) {
+      metrics.recordAuthAttempt('login', false);
+      const { delayMs } = registerFailure(key);
+      logFailedLogin(req, normalizedEmail, 'rate-limited');
+      await sleep(Math.max(delayMs, LOCKED_RESPONSE_DELAY_MS));
+      return res.status(401).json({ message: 'invalid email or password' });
+    }
+
+    if (isBlank(email) || isBlank(password)) {
+      metrics.recordAuthAttempt('login', false);
+      const { delayMs } = registerFailure(key);
+      logFailedLogin(req, normalizedEmail, 'invalid-input');
+      await sleep(delayMs);
+      return res.status(401).json({ message: 'invalid email or password' });
+    }
+
     try {
-      const user = await DB.getUser(email, password);
+      const user = await DB.getUser(normalizedEmail, password);
+      clearFailures(key);
       const auth = await setAuth(user);
       metrics.recordAuthAttempt('login', true);
       res.json({ user: user, token: auth });
     } catch (error) {
+      if (isAuthenticationError(error)) {
+        metrics.recordAuthAttempt('login', false);
+        const { delayMs } = registerFailure(key);
+        logFailedLogin(req, normalizedEmail, 'bad-credentials', { statusCode: error.statusCode });
+        await sleep(delayMs);
+        return res.status(401).json({ message: 'invalid email or password' });
+      }
       metrics.recordAuthAttempt('login', false);
       throw error;
     }
@@ -135,5 +254,7 @@ function readAuthToken(req) {
   }
   return null;
 }
+
+authRouter.resetLoginLimiter = resetLoginLimiter;
 
 module.exports = { authRouter, setAuthUser, setAuth };

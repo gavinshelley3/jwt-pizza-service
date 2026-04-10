@@ -1,5 +1,6 @@
 const request = require("supertest");
 const metrics = require("../metrics.js");
+const { StatusCodeError } = require("../endpointHelper.js");
 const { app, mockDb, Role, baseUser, authHeader, resetMocks } = require("./testUtils");
 
 let authAttemptSpy;
@@ -52,6 +53,54 @@ describe("auth endpoints", () => {
     expect(mockDb.getUser).toHaveBeenCalledWith(existingUser.email, "secret");
     expect(res.body.token).toBe("signed-5");
     expect(res.body.user).toMatchObject({ id: 5, email: existingUser.email });
+  });
+
+  test("returns generic error for invalid credentials", async () => {
+    const invalidError = new StatusCodeError("unknown user", 404);
+    mockDb.getUser.mockRejectedValue(invalidError);
+
+    const res = await request(app).put("/api/auth").send({ email: "d@jwt.com", password: "bad" });
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toMatch(/invalid email or password/i);
+  });
+
+  test(
+    "locks repeated failed login attempts",
+    async () => {
+      const invalidError = new StatusCodeError("unknown user", 404);
+      mockDb.getUser.mockRejectedValue(invalidError);
+
+      for (let i = 0; i < 5; i += 1) {
+        const res = await request(app).put("/api/auth").send({ email: "d@jwt.com", password: "bad" });
+        expect(res.status).toBe(401);
+      }
+
+      mockDb.getUser.mockClear();
+
+      const lockedRes = await request(app).put("/api/auth").send({ email: "d@jwt.com", password: "bad" });
+
+      expect(lockedRes.status).toBe(401);
+      expect(lockedRes.body.message).toMatch(/invalid email or password/i);
+      expect(mockDb.getUser).not.toHaveBeenCalled();
+    },
+    15000
+  );
+
+  describe("login input validation", () => {
+    test.each([
+      ["missing password", { email: "d@jwt.com" }],
+      ["empty password", { email: "d@jwt.com", password: "" }],
+      ["whitespace password", { email: "d@jwt.com", password: "   " }],
+      ["missing email", { password: "secret" }],
+    ])("rejects login when %s", async (_, payload) => {
+      const res = await request(app).put("/api/auth").send(payload);
+
+      expect(res.status).toBe(401);
+      expect(res.body.message).toMatch(/invalid email or password/i);
+      expect(mockDb.getUser).not.toHaveBeenCalled();
+      expect(authAttemptSpy).toHaveBeenCalledWith("login", false);
+    });
   });
 
   test("requires authentication to log out", async () => {

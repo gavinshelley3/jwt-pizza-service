@@ -47,6 +47,7 @@ applyDefaultFetch();
 const { Role } = require("../database/database.js");
 const app = require("../service");
 const orderRouter = require("./orderRouter.js");
+const { authRouter } = require("./authRouter.js");
 
 const baseUser = (overrides = {}) => ({
   id: 10,
@@ -68,6 +69,7 @@ const resetMocks = () => {
   global.fetch.mockReset();
   applyDefaultFetch();
   orderRouter.setChaosState?.(false);
+  authRouter.resetLoginLimiter?.();
 };
 
 module.exports = { app, mockDb, Role, baseUser, authHeader, resetMocks };
